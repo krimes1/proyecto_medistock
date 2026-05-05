@@ -1,0 +1,38 @@
+# Entorno virtual
+env/
+venv/
+.venv/
+
+# Base de datos SQLite
+db.sqlite3
+db.sqlite3-journal
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribución / packaging
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
+
+# Variables de entorno
+.env
+
+# Media uploads
+media/
+
+# Gemini
+.gemini/

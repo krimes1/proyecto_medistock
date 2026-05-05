@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_descripcion %}MediStock - Distribuidora de insumos medicos en Chile.{% endblock %}">
+    <title>{% block titulo %}MediStock{% endblock %} | Insumos Medicos Chile</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block css_extra %}{% endblock %}
+</head>
+<body>
+    <div class="navbar__top">
+        <div class="container">
+            <span>📍 Providencia, Santiago — Lun-Vie 8:00 a 18:00</span>
+            <div>
+                <a href="tel:+56222392520">📞 +56 2 2239 2520</a> &nbsp;|&nbsp;
+                <a href="mailto:contacto@medistock.cl">✉ contacto@medistock.cl</a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="navbar__main">
+            <div class="container">
+                <a href="{% url 'core:inicio' %}" class="navbar__logo">
+                    <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#0A6EBD"/><path d="M20 8v24M8 20h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>
+                    Medi<span>Stock</span>
+                </a>
+                <div class="navbar__links" id="navLinks">
+                    <a href="{% url 'core:inicio' %}">Inicio</a>
+                    <a href="{% url 'productos:lista_productos' %}">Catalogo</a>
+                    <a href="{% url 'core:nosotros' %}">Nosotros</a>
+                    <a href="{% url 'core:contacto' %}">Contacto</a>
+                </div>
+                <div class="navbar__actions">
+                    <a href="{% url 'carrito:detalle_carrito' %}" class="navbar__cart">
+                        🛒 Carrito
+                        {% if cantidad_items_carrito %}<span class="navbar__cart-badge">{{ cantidad_items_carrito }}</span>{% endif %}
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="#" class="btn btn--sm btn--outline">{{ user.first_name|default:user.username }}</a>
+                    {% else %}
+                        <a href="{% url 'cuentas:login' %}" class="btn btn--sm btn--primary">Ingresar</a>
+                    {% endif %}
+                    <button class="navbar__toggle" onclick="document.getElementById('navLinks').classList.toggle('navbar__links--active')">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message message--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>{% block contenido %}{% endblock %}</main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div>
+                    <div class="footer__brand-name">Medi<span>Stock</span></div>
+                    <p class="footer__text">Distribuidora de insumos medicos establecida en Providencia. Abastecemos clinicas (B2B) y pacientes particulares (B2C).</p>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Navegacion</h4>
+                    <ul class="footer__links">
+                        <li><a href="{% url 'core:inicio' %}">Inicio</a></li>
+                        <li><a href="{% url 'productos:lista_productos' %}">Catalogo</a></li>
+                        <li><a href="{% url 'core:nosotros' %}">Nosotros</a></li>
+                        <li><a href="{% url 'core:contacto' %}">Contacto</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Categorias</h4>
+                    <ul class="footer__links">
+                        <li><a href="#">Descartables</a></li>
+                        <li><a href="#">Quirurgicos</a></li>
+                        <li><a href="#">Equipamiento</a></li>
+                        <li><a href="#">Laboratorio</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Contacto</h4>
+                    <div class="footer__contact-item">📍 Providencia, Santiago, Chile</div>
+                    <div class="footer__contact-item">📞 +56 2 2239 2520</div>
+                    <div class="footer__contact-item">✉ contacto@medistock.cl</div>
+                </div>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <div class="container">© 2026 MediStock. Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+    </script>
+    {% block js_extra %}{% endblock %}
+</body>
+</html>

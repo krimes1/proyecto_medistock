@@ -1,0 +1,30 @@
+CONTEXTO: Contexto: La industria de la salud y el abastecimiento clínico en Chile ha experimentado
+una transformación radical en la última década. Esto ha generado una demanda crítica y
+constante de insumos médicos, desde material descartable (jeringas, guantes) hasta
+equipamiento de alta complejidad (monitores de signos vitales). A diferencia del retail
+tradicional, este sector exige tiempos de respuesta inmediatos y un control de inventario
+estricto, ya que un quiebre de stock puede afectar la atención de pacientes.
+"MEDISTOCK" es una distribuidora establecida en la comuna de Providencia desde
+principios de los 2000. Cuenta con 3 centros de distribución en la Región Metropolitana y 2
+en el sur de Chile. Abastece tanto a grandes redes de clínicas (B2B) como a pacientes
+particulares con hospitalización domiciliaria (B2C).
+Cada sucursal de "MEDISTOCK" tiene una estructura organizativa clara, con roles definidos:
+• Administrador: Encargado de generar informes de venta y gestionar alianzas
+estratégicas con clínicas.
+• Ejecutivo de Cuentas (Vendedor): Asesora a instituciones, gestiona cotizaciones
+complejas y procesa pedidos.
+• Operador Logístico (Bodeguero): Mantiene el inventario con control de
+lotes/caducidad, prepara el picking clínico y despacha.
+• Analista de Finanzas (Contador): Registra transacciones, concilia pagos de
+aseguradoras y elabora reportes financieros.
+
+LO QUE DEBE INCLUIR: El sitio web debe incluir:
+• Sistema de Inicio de Sesión segmentado para Instituciones (Clínicas), Pacientes,
+Administradores, Ejecutivos, Operadores Logísticos y Analistas.
+• Vista Cliente (Institución/Paciente): Visualizar catálogo en tiempo real, comprar
+mediante carrito, seleccionar despacho express o normal, y opciones de pago.
+• Vista Ejecutivo: Revisar stock en múltiples bodegas, aprobar compras
+institucionales y derivar órdenes a logística.
+• Vista Operador Logístico: Ver órdenes priorizadas por urgencia médica, confirmar
+preparación y despachar.
+• Vista Analista de Finanzas: Confirmar transferencias y auditar pagos.

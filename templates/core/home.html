@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<!-- Hero -->
+<section class="hero">
+    <div class="container">
+        <div class="hero__content">
+            <span class="hero__tag">🏥 Distribuidora de Insumos Medicos</span>
+            <h1 class="hero__title">Tu aliado en<br><span>insumos medicos</span><br>de calidad</h1>
+            <p class="hero__subtitle">Abastecemos clinicas, hospitales y pacientes particulares con insumos descartables y quirurgicos. Despacho express a todo Chile.</p>
+            <div class="hero__buttons">
+                <a href="{% url 'productos:lista_productos' %}" class="btn btn--secondary btn--lg">Ver Catalogo →</a>
+                <a href="{% url 'core:contacto' %}" class="btn btn--outline btn--lg" style="border-color:rgba(255,255,255,0.3);color:white;">Contactar</a>
+            </div>
+            <div class="hero__stats">
+                <div><div class="hero__stat-number">5</div><div class="hero__stat-label">Centros de Distribucion</div></div>
+                <div><div class="hero__stat-number">500+</div><div class="hero__stat-label">Productos Disponibles</div></div>
+                <div><div class="hero__stat-number">24h</div><div class="hero__stat-label">Despacho Express</div></div>
+            </div>
+        </div>
+        <div class="hero__visual">
+            <div class="hero__visual-icon">
+                <svg viewBox="0 0 200 200" fill="none">
+                    <path d="M100 20v160M20 100h160" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+                    <rect x="60" y="40" width="80" height="120" rx="10" stroke="white" stroke-width="3" opacity="0.5"/>
+                    <circle cx="100" cy="85" r="20" stroke="#12B886" stroke-width="3"/>
+                    <path d="M92 85l6 6 12-12" stroke="#12B886" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categorias -->
+<section class="section section--white">
+    <div class="container">
+        <div class="section__header">
+            <span class="section__tag">Categorias</span>
+            <h2 class="section__title">Nuestras Lineas de Productos</h2>
+            <p class="section__subtitle">Insumos medicos certificados para cada necesidad clinica</p>
+        </div>
+        <div class="categories-grid">
+            {% for categoria in categorias %}
+            <a href="{{ categoria.get_absolute_url }}" class="category-card">
+                <div class="category-card__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <h3 class="category-card__name">{{ categoria.nombre }}</h3>
+                <p class="category-card__count">{{ categoria.productos.count }} productos</p>
+            </a>
+            {% empty %}
+            <div class="category-card">
+                <div class="category-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div>
+                <h3 class="category-card__name">Descartables</h3>
+                <p class="category-card__count">Guantes, jeringas, mascarillas</p>
+            </div>
+            <div class="category-card">
+                <div class="category-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                <h3 class="category-card__name">Quirurgicos</h3>
+                <p class="category-card__count">Instrumental especializado</p>
+            </div>
+            <div class="category-card">
+                <div class="category-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+                <h3 class="category-card__name">Equipamiento</h3>
+                <p class="category-card__count">Monitores y dispositivos</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+<section class="section section--gray">
+    <div class="container">
+        <div class="section__header">
+            <span class="section__tag">Destacados</span>
+            <h2 class="section__title">Productos Mas Solicitados</h2>
+            <p class="section__subtitle">Los insumos que nuestros clientes mas confian</p>
+        </div>
+        <div class="products-grid">
+            {% for producto in productos_destacados %}
+            <a href="{{ producto.get_absolute_url }}" class="product-card">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-card__image">
+                {% else %}
+                <div class="product-card__image" style="display:flex;align-items:center;justify-content:center;background:var(--primary-light);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                </div>
+                {% endif %}
+                <div class="product-card__body">
+                    <div class="product-card__category">{{ producto.categoria.nombre }}</div>
+                    <h3 class="product-card__name">{{ producto.nombre }}</h3>
+                    {% if producto.en_stock %}<span class="badge badge--success">En Stock</span>{% else %}<span class="badge badge--danger">Sin Stock</span>{% endif %}
+                    <div class="product-card__footer">
+                        <div class="product-card__price">${{ producto.precio|floatformat:0 }} <small>CLP</small></div>
+                        <button class="product-card__btn">+</button>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            {% for i in "1234" %}
+            <div class="product-card">
+                <div class="product-card__image" style="display:flex;align-items:center;justify-content:center;background:var(--primary-light);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                </div>
+                <div class="product-card__body">
+                    <div class="product-card__category">Descartables</div>
+                    <h3 class="product-card__name">Producto de ejemplo {{ forloop.counter }}</h3>
+                    <span class="badge badge--success">En Stock</span>
+                    <div class="product-card__footer">
+                        <div class="product-card__price">$15.990 <small>CLP</small></div>
+                        <button class="product-card__btn">+</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Por que elegirnos -->
+<section class="section section--dark">
+    <div class="container">
+        <div class="section__header">
+            <span class="section__tag" style="background:rgba(10,110,189,0.3);">Por que elegirnos?</span>
+            <h2 class="section__title">MediStock, mas que un proveedor</h2>
+            <p class="section__subtitle" style="color:rgba(255,255,255,0.6);">Somos tu aliado estrategico en el abastecimiento de insumos medicos</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#12B886" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+                <h3 class="feature-card__title">Despacho Express</h3>
+                <p class="feature-card__text">Entrega en 24 horas para pedidos urgentes. Porque en salud, cada minuto cuenta.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#12B886" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+                <h3 class="feature-card__title">Calidad Certificada</h3>
+                <p class="feature-card__text">Todos nuestros productos cumplen normativas ISP y estandares internacionales.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#12B886" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+                <h3 class="feature-card__title">B2B y B2C</h3>
+                <p class="feature-card__text">Atendemos clinicas con cotizaciones especiales y pacientes con venta directa.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#12B886" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                <h3 class="feature-card__title">5 Centros de Distribucion</h3>
+                <p class="feature-card__text">3 bodegas en la Region Metropolitana y 2 en el sur de Chile para cobertura nacional.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
