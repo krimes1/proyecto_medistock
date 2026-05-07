@@ -64,30 +64,35 @@ marca_cardinal = Marca.objects.get(slug='cardinal-health')
 marca_medipro = Marca.objects.get(slug='medipro')
 
 datos_productos = [
-    ('Guantes de Nitrilo Caja x100', 'guantes-nitrilo-x100', 'MS-D001', cat_desc, marca_medline, 12990, 'descartable', True),
-    ('Jeringas Desechables 5ml x50', 'jeringas-5ml-x50', 'MS-D002', cat_desc, marca_bd, 8990, 'descartable', True),
-    ('Mascarillas Quirurgicas x50', 'mascarillas-quirurgicas-x50', 'MS-D003', cat_desc, marca_3m, 6990, 'descartable', True),
-    ('Gasa Esteril 10x10 x100', 'gasa-esteril-10x10', 'MS-C001', cat_cur, marca_medline, 15990, 'descartable', True),
-    ('Venda Elastica 10cm x12', 'venda-elastica-10cm', 'MS-C002', cat_cur, marca_cardinal, 9490, 'descartable', False),
-    ('Set de Sutura Basico', 'set-sutura-basico', 'MS-Q001', cat_quir, marca_medipro, 45990, 'quirurgico', True),
-    ('Pinza Hemostatica Kelly', 'pinza-hemostatica-kelly', 'MS-Q002', cat_quir, marca_medipro, 32990, 'quirurgico', False),
-    ('Bisturi Desechable N15 x10', 'bisturi-desechable-n15', 'MS-Q003', cat_quir, marca_bd, 18990, 'quirurgico', True),
-    ('Oximetro de Pulso Digital', 'oximetro-pulso-digital', 'MS-E001', cat_equip, marca_medipro, 29990, 'quirurgico', True),
-    ('Tensiometro Digital de Brazo', 'tensiometro-digital-brazo', 'MS-E002', cat_equip, marca_medipro, 34990, 'quirurgico', True),
-    ('Termometro Infrarrojo Medico', 'termometro-infrarrojo', 'MS-E003', cat_equip, marca_3m, 45000, 'quirurgico', True),
-    ('Estetoscopio Profesional', 'estetoscopio-profesional', 'MS-E004', cat_equip, marca_medline, 59990, 'quirurgico', False),
-    ('Tubos de Ensayo x100', 'tubos-ensayo-x100', 'MS-L001', cat_lab, marca_bd, 22990, 'descartable', False),
-    ('Pipetas Pasteur Esteriles x500', 'pipetas-pasteur-x500', 'MS-L002', cat_lab, marca_cardinal, 18990, 'descartable', False),
-    ('Traje Tyvek Proteccion Total', 'traje-tyvek-proteccion', 'MS-P001', cat_epp, marca_3m, 15990, 'descartable', True),
-    ('Careta Facial Protectora', 'careta-facial-protectora', 'MS-P002', cat_epp, marca_3m, 7990, 'descartable', False),
+    ('Guantes de Nitrilo Caja x100', 'guantes-nitrilo-x100', 'MS-D001', cat_desc, marca_medline, 12990, 'descartable', True, 'productos/guantes-nitrilo.png'),
+    ('Jeringas Desechables 5ml x50', 'jeringas-5ml-x50', 'MS-D002', cat_desc, marca_bd, 8990, 'descartable', True, 'productos/jeringas.png'),
+    ('Mascarillas Quirurgicas x50', 'mascarillas-quirurgicas-x50', 'MS-D003', cat_desc, marca_3m, 6990, 'descartable', True, 'productos/mascarillas.png'),
+    ('Gasa Esteril 10x10 x100', 'gasa-esteril-10x10', 'MS-C001', cat_cur, marca_medline, 15990, 'descartable', True, 'productos/gasa.png'),
+    ('Venda Elastica 10cm x12', 'venda-elastica-10cm', 'MS-C002', cat_cur, marca_cardinal, 9490, 'descartable', False, ''),
+    ('Set de Sutura Basico', 'set-sutura-basico', 'MS-Q001', cat_quir, marca_medipro, 45990, 'quirurgico', True, 'productos/set-sutura.png'),
+    ('Pinza Hemostatica Kelly', 'pinza-hemostatica-kelly', 'MS-Q002', cat_quir, marca_medipro, 32990, 'quirurgico', False, ''),
+    ('Bisturi Desechable N15 x10', 'bisturi-desechable-n15', 'MS-Q003', cat_quir, marca_bd, 18990, 'quirurgico', True, ''),
+    ('Oximetro de Pulso Digital', 'oximetro-pulso-digital', 'MS-E001', cat_equip, marca_medipro, 29990, 'quirurgico', True, 'productos/oximetro.png'),
+    ('Tensiometro Digital de Brazo', 'tensiometro-digital-brazo', 'MS-E002', cat_equip, marca_medipro, 34990, 'quirurgico', True, 'productos/tensiometro.png'),
+    ('Termometro Infrarrojo Medico', 'termometro-infrarrojo', 'MS-E003', cat_equip, marca_3m, 45000, 'quirurgico', True, 'productos/termometro.png'),
+    ('Estetoscopio Profesional', 'estetoscopio-profesional', 'MS-E004', cat_equip, marca_medline, 59990, 'quirurgico', False, ''),
+    ('Tubos de Ensayo x100', 'tubos-ensayo-x100', 'MS-L001', cat_lab, marca_bd, 22990, 'descartable', False, ''),
+    ('Pipetas Pasteur Esteriles x500', 'pipetas-pasteur-x500', 'MS-L002', cat_lab, marca_cardinal, 18990, 'descartable', False, ''),
+    ('Traje Tyvek Proteccion Total', 'traje-tyvek-proteccion', 'MS-P001', cat_epp, marca_3m, 15990, 'descartable', True, ''),
+    ('Careta Facial Protectora', 'careta-facial-protectora', 'MS-P002', cat_epp, marca_3m, 7990, 'descartable', False, ''),
 ]
 
-for nombre, slug, sku, cat, marca, precio, tipo, destacado in datos_productos:
+for nombre, slug, sku, cat, marca, precio, tipo, destacado, imagen in datos_productos:
     Producto.objects.get_or_create(sku=sku, defaults={
         'nombre': nombre, 'slug': slug, 'descripcion': f'{nombre}. Producto de alta calidad para uso clinico profesional.',
         'descripcion_corta': nombre, 'categoria': cat, 'marca': marca,
         'precio': precio, 'tipo_producto': tipo, 'destacado': destacado,
+        'imagen': imagen if imagen else None
     })
+    
+    if imagen:
+        Producto.objects.filter(sku=sku).update(imagen=imagen)
+
 print(f"{Producto.objects.count()} productos")
 
 # --- Stock ---

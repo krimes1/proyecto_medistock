@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block titulo %}Nosotros{% endblock %}
+{% block meta_descripcion %}Conoce MediStock, distribuidora de insumos médicos en Chile desde principios de los 2000.{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">🏥 Sobre MediStock</h1>
+        <p class="page-header__subtitle">Tu aliado estratégico en abastecimiento de insumos médicos</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="nosotros-grid">
+            <div>
+                <h2 style="font-size:1.8rem;margin-bottom:1rem;">Nuestra Historia</h2>
+                <p style="line-height:1.8;color:var(--gray-700);">
+                    <strong>MEDISTOCK</strong> es una distribuidora de insumos médicos establecida en la comuna de
+                    <strong>Providencia</strong> desde principios de los 2000. Con más de dos décadas de experiencia
+                    en el sector salud, nos hemos convertido en un referente del abastecimiento clínico en Chile.
+                </p>
+                <p style="line-height:1.8;color:var(--gray-700);margin-top:1rem;">
+                    Contamos con <strong>3 centros de distribución en la Región Metropolitana</strong> y
+                    <strong>2 en el sur de Chile</strong>, lo que nos permite ofrecer cobertura nacional con
+                    tiempos de respuesta inmediatos.
+                </p>
+                <p style="line-height:1.8;color:var(--gray-700);margin-top:1rem;">
+                    Abastecemos tanto a <strong>grandes redes de clínicas (B2B)</strong> como a
+                    <strong>pacientes particulares con hospitalización domiciliaria (B2C)</strong>,
+                    ofreciendo insumos desde material descartable hasta equipamiento de alta complejidad.
+                </p>
+            </div>
+            <div class="nosotros-stats">
+                <div class="nosotros-stat">
+                    <div class="nosotros-stat__numero">20+</div>
+                    <div class="nosotros-stat__label">Años de experiencia</div>
+                </div>
+                <div class="nosotros-stat">
+                    <div class="nosotros-stat__numero">5</div>
+                    <div class="nosotros-stat__label">Centros de distribución</div>
+                </div>
+                <div class="nosotros-stat">
+                    <div class="nosotros-stat__numero">500+</div>
+                    <div class="nosotros-stat__label">Productos disponibles</div>
+                </div>
+                <div class="nosotros-stat">
+                    <div class="nosotros-stat__numero">24h</div>
+                    <div class="nosotros-stat__label">Despacho express</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section--gray">
+    <div class="container">
+        <div class="section__header">
+            <span class="section__tag">Nuestro Equipo</span>
+            <h2 class="section__title">Estructura Organizativa</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card" style="background:white;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                <h3 class="feature-card__title">Administrador</h3>
+                <p class="feature-card__text">Genera informes de venta y gestiona alianzas estratégicas con clínicas.</p>
+            </div>
+            <div class="feature-card" style="background:white;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg></div>
+                <h3 class="feature-card__title">Ejecutivo de Cuentas</h3>
+                <p class="feature-card__text">Asesora a instituciones, gestiona cotizaciones complejas y procesa pedidos.</p>
+            </div>
+            <div class="feature-card" style="background:white;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+                <h3 class="feature-card__title">Operador Logístico</h3>
+                <p class="feature-card__text">Mantiene inventario con control de lotes/caducidad, prepara picking y despacha.</p>
+            </div>
+            <div class="feature-card" style="background:white;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);">
+                <div class="feature-card__icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+                <h3 class="feature-card__title">Analista de Finanzas</h3>
+                <p class="feature-card__text">Registra transacciones, concilia pagos y elabora reportes financieros.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

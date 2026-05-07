@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear Cuenta{% endblock %}
+
+{% block contenido %}
+<section class="section section--white" style="min-height:70vh;display:flex;align-items:center;">
+    <div class="container">
+        <div class="auth-card auth-card--wide">
+            <div class="auth-card__header">
+                <h1>Crear Cuenta</h1>
+                <p>Únete a MediStock y accede a nuestro catálogo</p>
+            </div>
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">Nombre</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<span class="form-error">{{ form.first_name.errors.0 }}</span>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Apellido</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<span class="form-error">{{ form.last_name.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<span class="form-error">{{ form.email.errors.0 }}</span>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_username">Nombre de Usuario</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}<span class="form-error">{{ form.username.errors.0 }}</span>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_rol">Tipo de Cuenta</label>
+                    {{ form.rol }}
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_password">Contraseña</label>
+                        {{ form.password }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password2">Confirmar Contraseña</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}<span class="form-error">{{ form.password2.errors.0 }}</span>{% endif %}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">Crear Cuenta</button>
+            </form>
+            <div class="auth-card__footer">
+                <p>¿Ya tienes cuenta? <a href="{% url 'cuentas:login' %}">Inicia sesión</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block titulo %}WebPay Plus — Pago Seguro{% endblock %}
+
+{% block css_extra %}
+<style>
+    .webpay-container {
+        max-width: 500px;
+        margin: 3rem auto;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    }
+    .webpay-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        text-align: center;
+    }
+    .webpay-header h2 { font-size: 1.3rem; margin-bottom: 0.3rem; }
+    .webpay-header p { opacity: 0.7; font-size: 0.85rem; }
+    .webpay-header .webpay-logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #FF6B35;
+        margin-bottom: 0.5rem;
+    }
+    .webpay-body { padding: 2rem; }
+    .webpay-monto {
+        text-align: center;
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .webpay-monto .monto { font-size: 2rem; font-weight: 800; color: #1a1a2e; }
+    .webpay-monto .moneda { font-size: 0.9rem; color: #6c757d; }
+    .webpay-campo {
+        margin-bottom: 1.2rem;
+    }
+    .webpay-campo label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+    .webpay-campo input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.3s;
+    }
+    .webpay-campo input:focus {
+        outline: none;
+        border-color: #0A6EBD;
+    }
+    .webpay-seguridad {
+        text-align: center;
+        padding: 1rem;
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    .webpay-seguridad span { color: #2ecc71; }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<section class="section section--gray" style="min-height: 80vh;">
+    <div class="webpay-container">
+        <div class="webpay-header">
+            <div class="webpay-logo">WebPay Plus</div>
+            <h2>Pago Seguro — Transbank</h2>
+            <p>Ambiente de Integración (Simulado)</p>
+        </div>
+        <div class="webpay-body">
+            <div class="webpay-monto">
+                <div class="moneda">Total a pagar</div>
+                <div class="monto">${{ monto|floatformat:0 }} CLP</div>
+            </div>
+
+            <form method="post" action="{% url 'pagos:retorno_webpay' %}">
+                {% csrf_token %}
+                <input type="hidden" name="token" value="{{ token }}">
+                <input type="hidden" name="pedido_id" value="{{ pedido.pk }}">
+
+                <div class="webpay-campo">
+                    <label>Número de Tarjeta</label>
+                    <input type="text" value="4051 8856 0044 6623" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div class="webpay-campo">
+                        <label>Vencimiento</label>
+                        <input type="text" value="12/28" placeholder="MM/AA">
+                    </div>
+                    <div class="webpay-campo">
+                        <label>CVV</label>
+                        <input type="text" value="123" placeholder="123" maxlength="4">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">
+                    Pagar ${{ monto|floatformat:0 }} CLP
+                </button>
+            </form>
+
+            <div class="webpay-seguridad">
+                <span>🔒</span> Transacción protegida con encriptación SSL.<br>
+                Datos de tarjeta pre-llenados (ambiente de prueba).
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}{{ producto.nombre }}{% endblock %}
+{% block meta_descripcion %}{{ producto.descripcion_corta|default:producto.nombre }} - Compra en MediStock.{% endblock %}
+
+{% block contenido %}
+<section class="section section--white">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{% url 'productos:lista_productos' %}">Catálogo</a> &raquo;
+            <a href="{% url 'productos:detalle_categoria' slug=producto.categoria.slug %}">{{ producto.categoria.nombre }}</a> &raquo;
+            <span>{{ producto.nombre }}</span>
+        </div>
+
+        <div class="producto-detalle">
+            <div class="producto-detalle__imagen">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% else %}
+                <div class="producto-detalle__placeholder">
+                    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                </div>
+                {% endif %}
+            </div>
+            <div class="producto-detalle__info">
+                <span class="section__tag">{{ producto.categoria.nombre }}</span>
+                <h1 class="producto-detalle__nombre">{{ producto.nombre }}</h1>
+                <p class="producto-detalle__sku">SKU: {{ producto.sku }}{% if producto.marca %} · Marca: {{ producto.marca.nombre }}{% endif %}</p>
+
+                <div class="producto-detalle__precio">${{ producto.precio|floatformat:0 }} <small>CLP</small></div>
+
+                {% if producto.en_stock %}
+                    <span class="badge badge--success" style="font-size:0.9rem;padding:0.4rem 1rem;">✓ En Stock — {{ producto.stock_total }} unidades</span>
+                {% else %}
+                    <span class="badge badge--danger" style="font-size:0.9rem;padding:0.4rem 1rem;">✗ Sin Stock</span>
+                {% endif %}
+
+                {% if producto.requiere_receta %}
+                <div class="alert alert--warning" style="margin-top:1rem;">
+                    ⚠️ Este producto requiere receta médica para su compra.
+                </div>
+                {% endif %}
+
+                <p class="producto-detalle__descripcion">{{ producto.descripcion }}</p>
+
+                {% if producto.en_stock %}
+                <form method="post" action="{% url 'carrito:agregar' producto_id=producto.pk %}" class="producto-detalle__form">
+                    {% csrf_token %}
+                    <div class="cantidad-control">
+                        <label for="cantidad">Cantidad:</label>
+                        <input type="number" name="cantidad" id="cantidad" value="1" min="1" max="{{ producto.stock_total }}" class="form-control" style="width:80px;">
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--lg">🛒 Agregar al Carrito</button>
+                </form>
+                {% endif %}
+
+                <!-- Stock por bodega -->
+                {% if stock_items %}
+                <div class="stock-bodegas">
+                    <h3>📦 Disponibilidad por Bodega</h3>
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Bodega</th>
+                                <th>Ciudad</th>
+                                <th>Lote</th>
+                                <th>Disponible</th>
+                                <th>Vence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stock_items %}
+                            <tr>
+                                <td>{{ item.bodega.nombre }}</td>
+                                <td>{{ item.bodega.ciudad }}</td>
+                                <td>{{ item.numero_lote }}</td>
+                                <td>
+                                    <span class="badge {% if item.stock_bajo %}badge--warning{% else %}badge--success{% endif %}">
+                                        {{ item.cantidad }}
+                                    </span>
+                                </td>
+                                <td>{{ item.fecha_vencimiento|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Productos relacionados -->
+        {% if productos_relacionados %}
+        <div class="seccion-relacionados">
+            <h2 class="section__title" style="font-size:1.5rem;">Productos Relacionados</h2>
+            <div class="products-grid">
+                {% for prod in productos_relacionados %}
+                <a href="{{ prod.get_absolute_url }}" class="product-card">
+                    {% if prod.imagen %}
+                    <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" class="product-card__image">
+                    {% else %}
+                    <div class="product-card__image product-card__image--placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                    </div>
+                    {% endif %}
+                    <div class="product-card__body">
+                        <div class="product-card__category">{{ prod.categoria.nombre }}</div>
+                        <h3 class="product-card__name">{{ prod.nombre }}</h3>
+                        <div class="product-card__footer">
+                            <div class="product-card__price">${{ prod.precio|floatformat:0 }} <small>CLP</small></div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

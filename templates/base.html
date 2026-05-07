@@ -29,7 +29,8 @@
                 </a>
                 <div class="navbar__links" id="navLinks">
                     <a href="{% url 'core:inicio' %}">Inicio</a>
-                    <a href="{% url 'productos:lista_productos' %}">Catalogo</a>
+                    <a href="{% url 'productos:lista_productos' %}">Catálogo</a>
+                    <a href="{% url 'envios:tracking' %}">Tracking</a>
                     <a href="{% url 'core:nosotros' %}">Nosotros</a>
                     <a href="{% url 'core:contacto' %}">Contacto</a>
                 </div>
@@ -39,7 +40,21 @@
                         {% if cantidad_items_carrito %}<span class="navbar__cart-badge">{{ cantidad_items_carrito }}</span>{% endif %}
                     </a>
                     {% if user.is_authenticated %}
-                        <a href="#" class="btn btn--sm btn--outline">{{ user.first_name|default:user.username }}</a>
+                        <div class="user-menu" style="position:relative;display:inline-block;">
+                            <a href="{% url 'cuentas:perfil' %}" class="btn btn--sm btn--outline">
+                                👤 {{ user.first_name|default:user.username }}
+                            </a>
+                        </div>
+                        {% if user.perfil.rol == 'administrador' %}
+                            <a href="{% url 'dashboards:administrador' %}" class="btn btn--sm btn--secondary">Panel</a>
+                        {% elif user.perfil.rol == 'ejecutivo' %}
+                            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--secondary">Panel</a>
+                        {% elif user.perfil.rol == 'logistica' %}
+                            <a href="{% url 'dashboards:logistica' %}" class="btn btn--sm btn--secondary">Panel</a>
+                        {% elif user.perfil.rol == 'analista' %}
+                            <a href="{% url 'dashboards:analista' %}" class="btn btn--sm btn--secondary">Panel</a>
+                        {% endif %}
+                        <a href="{% url 'cuentas:logout' %}" class="btn btn--sm btn--danger" style="margin-left:0.5rem;background:var(--danger);color:white;border-color:var(--danger);">Cerrar Sesión</a>
                     {% else %}
                         <a href="{% url 'cuentas:login' %}" class="btn btn--sm btn--primary">Ingresar</a>
                     {% endif %}

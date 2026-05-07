@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Catálogo de Productos{% endblock %}
+{% block meta_descripcion %}Catálogo completo de insumos médicos MediStock. Guantes, jeringas, equipamiento quirúrgico y más.{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">Catálogo de Productos</h1>
+        <p class="page-header__subtitle">Insumos médicos certificados para cada necesidad clínica</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="catalogo-layout">
+            <!-- Sidebar de filtros -->
+            <aside class="catalogo-sidebar">
+                <div class="filtro-card">
+                    <h3 class="filtro-card__title">🔍 Buscar</h3>
+                    <form method="get" action="{% url 'productos:lista_productos' %}">
+                        <input type="text" name="q" value="{{ query }}" placeholder="Buscar producto o SKU..." class="form-control">
+                        <button type="submit" class="btn btn--primary btn--sm" style="width:100%;margin-top:0.5rem;">Buscar</button>
+                    </form>
+                </div>
+
+                <div class="filtro-card">
+                    <h3 class="filtro-card__title">📂 Categorías</h3>
+                    <ul class="filtro-lista">
+                        <li><a href="{% url 'productos:lista_productos' %}" class="{% if not categoria_actual %}filtro-lista__active{% endif %}">Todas</a></li>
+                        {% for cat in categorias %}
+                        <li>
+                            <a href="{% url 'productos:lista_productos' %}?categoria={{ cat.slug }}"
+                               class="{% if categoria_actual.slug == cat.slug %}filtro-lista__active{% endif %}">
+                                {{ cat.nombre }}
+                                <span class="filtro-lista__count">{{ cat.productos.count }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="filtro-card">
+                    <h3 class="filtro-card__title">🏷️ Tipo</h3>
+                    <ul class="filtro-lista">
+                        <li><a href="{% url 'productos:lista_productos' %}{% if categoria_actual %}?categoria={{ categoria_actual.slug }}{% endif %}" class="{% if not tipo_actual %}filtro-lista__active{% endif %}">Todos</a></li>
+                        <li><a href="{% url 'productos:lista_productos' %}?tipo=descartable{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if tipo_actual == 'descartable' %}filtro-lista__active{% endif %}">Descartables</a></li>
+                        <li><a href="{% url 'productos:lista_productos' %}?tipo=quirurgico{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if tipo_actual == 'quirurgico' %}filtro-lista__active{% endif %}">Quirúrgicos</a></li>
+                    </ul>
+                </div>
+
+                <div class="filtro-card">
+                    <h3 class="filtro-card__title">📊 Ordenar</h3>
+                    <ul class="filtro-lista">
+                        <li><a href="?orden=nombre{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if orden_actual == 'nombre' %}filtro-lista__active{% endif %}">Nombre A-Z</a></li>
+                        <li><a href="?orden=precio_asc{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if orden_actual == 'precio_asc' %}filtro-lista__active{% endif %}">Precio ↑</a></li>
+                        <li><a href="?orden=precio_desc{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if orden_actual == 'precio_desc' %}filtro-lista__active{% endif %}">Precio ↓</a></li>
+                        <li><a href="?orden=reciente{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if orden_actual == 'reciente' %}filtro-lista__active{% endif %}">Más recientes</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Grid de productos -->
+            <div class="catalogo-contenido">
+                {% if query %}
+                <div class="catalogo-info">
+                    <p>Resultados para: <strong>"{{ query }}"</strong> ({{ productos|length }} productos)</p>
+                </div>
+                {% endif %}
+
+                <div class="products-grid">
+                    {% for producto in productos %}
+                    <a href="{{ producto.get_absolute_url }}" class="product-card" id="producto-{{ producto.sku }}">
+                        {% if producto.imagen %}
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-card__image">
+                        {% else %}
+                        <div class="product-card__image product-card__image--placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                        </div>
+                        {% endif %}
+                        <div class="product-card__body">
+                            <div class="product-card__category">{{ producto.categoria.nombre }}</div>
+                            <h3 class="product-card__name">{{ producto.nombre }}</h3>
+                            <div class="product-card__sku">SKU: {{ producto.sku }}</div>
+                            {% if producto.en_stock %}
+                                <span class="badge badge--success">En Stock ({{ producto.stock_total }})</span>
+                            {% else %}
+                                <span class="badge badge--danger">Sin Stock</span>
+                            {% endif %}
+                            <div class="product-card__footer">
+                                <div class="product-card__price">${{ producto.precio|floatformat:0 }} <small>CLP</small></div>
+                                <div class="product-card__btn">+</div>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6C757D" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <h3>No se encontraron productos</h3>
+                        <p>Intenta con otros filtros o términos de búsqueda.</p>
+                        <a href="{% url 'productos:lista_productos' %}" class="btn btn--primary">Ver todos los productos</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

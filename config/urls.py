@@ -14,6 +14,7 @@ urlpatterns = [
     path('pagos/', include('pagos.urls')),
     path('envios/', include('envios.urls')),
     path('api/v1/', include('api.urls')),
+    path('panel/', include('core.dashboard_urls')),
 ]
 
 if settings.DEBUG:

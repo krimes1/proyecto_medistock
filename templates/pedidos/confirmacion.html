@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pedido Confirmado{% endblock %}
+
+{% block contenido %}
+<section class="section section--white" style="min-height:60vh;display:flex;align-items:center;">
+    <div class="container" style="text-align:center;max-width:600px;">
+        <div class="confirmacion-icon">✅</div>
+        <h1 style="font-size:2rem;margin:1rem 0;">¡Pedido Confirmado!</h1>
+        <p class="text-muted" style="font-size:1.1rem;">Tu pedido <strong>{{ pedido.numero_pedido }}</strong> ha sido procesado exitosamente.</p>
+        <div class="card" style="margin:2rem 0;text-align:left;">
+            <div class="carrito-resumen__linea"><span>Total pagado</span><span><strong>${{ pedido.total|floatformat:0 }} CLP</strong></span></div>
+            <div class="carrito-resumen__linea"><span>Despacho</span><span>{{ pedido.get_tipo_despacho_display }}</span></div>
+            <div class="carrito-resumen__linea"><span>Dirección</span><span>{{ pedido.ciudad_envio }}, {{ pedido.region_envio }}</span></div>
+        </div>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <a href="{% url 'pedidos:detalle' pedido_id=pedido.pk %}" class="btn btn--primary">Ver Detalle del Pedido</a>
+            <a href="{% url 'productos:lista_productos' %}" class="btn btn--outline">Seguir Comprando</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

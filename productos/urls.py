@@ -1,7 +1,10 @@
 from django.urls import path
+from . import views
+
 app_name = 'productos'
+
 urlpatterns = [
-    path('', lambda r: __import__('django.http', fromlist=['HttpResponse']).HttpResponse('Catalogo - Proximamente'), name='lista_productos'),
-    path('categoria/<slug:slug>/', lambda r, slug: __import__('django.http', fromlist=['HttpResponse']).HttpResponse(f'Categoria: {slug}'), name='detalle_categoria'),
-    path('<slug:slug>/', lambda r, slug: __import__('django.http', fromlist=['HttpResponse']).HttpResponse(f'Producto: {slug}'), name='detalle_producto'),
+    path('', views.lista_productos, name='lista_productos'),
+    path('categoria/<slug:slug>/', views.detalle_categoria, name='detalle_categoria'),
+    path('<slug:slug>/', views.detalle_producto, name='detalle_producto'),
 ]

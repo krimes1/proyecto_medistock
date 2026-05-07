@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pago Fallido{% endblock %}
+
+{% block contenido %}
+<section class="section section--white" style="min-height:60vh;display:flex;align-items:center;">
+    <div class="container" style="text-align:center;max-width:500px;">
+        <div style="font-size:4rem;">❌</div>
+        <h1 style="font-size:2rem;margin:1rem 0;">Pago No Procesado</h1>
+        <p class="text-muted">Lo sentimos, tu pago no pudo ser procesado. Puedes intentar nuevamente con otro método de pago.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap;">
+            <a href="{% url 'pagos:iniciar_pago' pedido_id=pedido.pk %}" class="btn btn--primary">Reintentar Pago</a>
+            <a href="{% url 'core:inicio' %}" class="btn btn--outline">Volver al Inicio</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

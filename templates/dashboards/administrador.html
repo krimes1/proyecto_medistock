@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block titulo %}Dashboard Administrador{% endblock %}
+
+{% block contenido %}
+<section class="page-header page-header--dark">
+    <div class="container">
+        <h1 class="page-header__title">🏢 Dashboard — Administrador</h1>
+        <p class="page-header__subtitle">Reportes de venta y métricas generales</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <!-- Métricas generales -->
+        <div class="metricas-grid">
+            <div class="metrica-card metrica--blue">
+                <div class="metrica-card__numero">{{ total_productos }}</div>
+                <div class="metrica-card__label">Productos Activos</div>
+            </div>
+            <div class="metrica-card metrica--green">
+                <div class="metrica-card__numero">${{ ingresos_totales|floatformat:0 }}</div>
+                <div class="metrica-card__label">Ingresos Totales</div>
+            </div>
+            <div class="metrica-card">
+                <div class="metrica-card__numero">{{ total_pedidos }}</div>
+                <div class="metrica-card__label">Pedidos Totales</div>
+            </div>
+            <div class="metrica-card metrica--warning">
+                <div class="metrica-card__numero">{{ pedidos_hoy }}</div>
+                <div class="metrica-card__label">Pedidos Hoy</div>
+            </div>
+        </div>
+
+        <!-- Pedidos por estado -->
+        <div class="admin-grid" style="margin-top:2rem;">
+            <div class="card">
+                <h2 class="card__title">📊 Pedidos por Estado</h2>
+                <div class="estado-barras">
+                    {% for item in pedidos_por_estado %}
+                    <div class="estado-barra">
+                        <span class="estado-barra__label">{{ item.estado|title }}</span>
+                        <div class="estado-barra__bar">
+                            <div class="estado-barra__fill" style="width: {% widthratio item.total total_pedidos 100 %}%"></div>
+                        </div>
+                        <span class="estado-barra__count">{{ item.total }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card__title">⚠️ Productos Bajo Stock</h2>
+                {% if bajo_stock %}
+                <table class="tabla tabla--sm">
+                    <thead><tr><th>Producto</th><th>Bodega</th><th>Cantidad</th></tr></thead>
+                    <tbody>
+                        {% for item in bajo_stock %}
+                        <tr>
+                            <td>{{ item.producto.nombre }}</td>
+                            <td>{{ item.bodega.codigo }}</td>
+                            <td><span class="badge badge--warning">{{ item.cantidad }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">Sin alertas de stock bajo.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Últimos pedidos -->
+        <h2 style="margin:2rem 0 1rem;">🕐 Últimos Pedidos</h2>
+        <div class="tabla-responsive">
+            <table class="tabla">
+                <thead><tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th>Prioridad</th><th>Total</th><th>Fecha</th></tr></thead>
+                <tbody>
+                    {% for pedido in ultimos_pedidos %}
+                    <tr>
+                        <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                        <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                        <td>
+                            <span class="badge {% if pedido.estado == 'entregado' %}badge--success{% elif pedido.estado == 'cancelado' %}badge--danger{% else %}badge--warning{% endif %}">
+                                {{ pedido.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>{{ pedido.get_prioridad_display }}</td>
+                        <td>${{ pedido.total|floatformat:0 }}</td>
+                        <td>{{ pedido.creado_en|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

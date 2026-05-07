@@ -1,0 +1,111 @@
+{% extends "base.html" %} {% block titulo %}Dashboard Analista{% endblock %} {%
+block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">💰 Dashboard — Analista de Finanzas</h1>
+    <p class="page-header__subtitle">
+      Confirmación de transferencias y auditoría de pagos
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <!-- Métricas -->
+    <div class="metricas-grid">
+      <div class="metrica-card metrica--green">
+        <div class="metrica-card__numero">
+          ${{ total_ingresos|floatformat:0 }}
+        </div>
+        <div class="metrica-card__label">Ingresos Totales</div>
+      </div>
+      <div class="metrica-card">
+        <div class="metrica-card__numero">{{ total_transacciones }}</div>
+        <div class="metrica-card__label">Transacciones Completadas</div>
+      </div>
+      <div class="metrica-card metrica--warning">
+        <div class="metrica-card__numero">{{ pagos_pendientes.count }}</div>
+        <div class="metrica-card__label">Pendientes de Confirmación</div>
+      </div>
+      <div class="metrica-card metrica--danger">
+        <div class="metrica-card__numero">{{ pagos_fallidos.count }}</div>
+        <div class="metrica-card__label">Pagos Fallidos</div>
+      </div>
+    </div>
+
+    <!-- Transferencias pendientes -->
+    {% if pagos_pendientes %}
+    <h2 style="margin: 2rem 0 1rem">
+      ⏳ Transferencias Pendientes de Confirmación
+    </h2>
+    <div class="tabla-responsive">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pago in pagos_pendientes %}
+          <tr>
+            <td>{{ pago.pedido.numero_pedido }}</td>
+            <td>{{ pago.pedido.usuario.get_full_name }}</td>
+            <td>{{ pago.get_metodo_display }}</td>
+            <td><strong>${{ pago.monto|floatformat:0 }}</strong></td>
+            <td>{{ pago.creado_en|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if pago.metodo == 'transferencia' %}
+              <a
+                href="{% url 'dashboards:confirmar_transferencia' pago_id=pago.pk %}"
+                class="btn btn--sm btn--secondary"
+                >✓ Confirmar</a
+              >
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Pagos completados (auditoría) -->
+    <h2 style="margin: 2rem 0 1rem">✅ Últimas Transacciones Completadas</h2>
+    {% if pagos_completados %}
+    <div class="tabla-responsive">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>ID Transacción</th>
+            <th>Pedido</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th>Código Auth</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pago in pagos_completados %}
+          <tr>
+            <td><code>{{ pago.id_transaccion|truncatechars:20 }}</code></td>
+            <td>{{ pago.pedido.numero_pedido }}</td>
+            <td>{{ pago.get_metodo_display }}</td>
+            <td><strong>${{ pago.monto|floatformat:0 }}</strong></td>
+            <td>{{ pago.codigo_autorizacion|default:"-" }}</td>
+            <td>{{ pago.completado_en|date:"d/m/Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No hay transacciones completadas.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

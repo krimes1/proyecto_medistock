@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mi Perfil{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">👤 Mi Perfil</h1>
+        <p class="page-header__subtitle">{{ request.user.get_full_name }} · {{ perfil.get_rol_display }}</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="perfil-layout">
+            <aside class="perfil-sidebar">
+                <div class="perfil-sidebar__card">
+                    <div class="perfil-sidebar__avatar">{{ request.user.first_name|first|default:"U" }}{{ request.user.last_name|first|default:"" }}</div>
+                    <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+                    <span class="badge badge--success">{{ perfil.get_rol_display }}</span>
+                </div>
+                <nav class="perfil-sidebar__nav">
+                    <a href="{% url 'cuentas:perfil' %}" class="active">📝 Editar Perfil</a>
+                    <a href="{% url 'cuentas:mis_pedidos' %}">📦 Mis Pedidos</a>
+                    {% if perfil.es_interno %}
+                        {% if perfil.rol == 'administrador' %}
+                        <a href="{% url 'dashboards:administrador' %}">📊 Mi Dashboard</a>
+                        {% elif perfil.rol == 'ejecutivo' %}
+                        <a href="{% url 'dashboards:ejecutivo' %}">📊 Mi Dashboard</a>
+                        {% elif perfil.rol == 'logistica' %}
+                        <a href="{% url 'dashboards:logistica' %}">📊 Mi Dashboard</a>
+                        {% elif perfil.rol == 'analista' %}
+                        <a href="{% url 'dashboards:analista' %}">📊 Mi Dashboard</a>
+                        {% endif %}
+                    {% endif %}
+                    <a href="{% url 'cuentas:logout' %}">🚪 Cerrar Sesión</a>
+                </nav>
+            </aside>
+
+            <div class="perfil-contenido">
+                <div class="card">
+                    <h2 class="card__title">Datos Personales</h2>
+                    <form method="post" class="auth-form">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="form-group">
+                                <label>Apellido</label>
+                                {{ form.last_name }}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="form-group">
+                                <label>RUT</label>
+                                {{ form.rut }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            {{ form.telefono }}
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            {{ form.direccion }}
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Ciudad</label>
+                                {{ form.ciudad }}
+                            </div>
+                            <div class="form-group">
+                                <label>Región</label>
+                                {{ form.region }}
+                            </div>
+                        </div>
+                        {% if perfil.rol == 'institucion' %}
+                        <h3 style="margin-top:1.5rem;margin-bottom:1rem;">Datos Institucionales</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Razón Social</label>
+                                {{ form.razon_social }}
+                            </div>
+                            <div class="form-group">
+                                <label>RUT Empresa</label>
+                                {{ form.rut_empresa }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn--primary">Guardar Cambios</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

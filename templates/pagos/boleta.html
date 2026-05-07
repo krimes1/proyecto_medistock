@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block titulo %}Boleta Electrónica {{ boleta.numero_boleta }}{% endblock %}
+
+{% block css_extra %}
+<style>
+    .boleta { max-width: 700px; margin: 2rem auto; background: white; border: 2px solid #dee2e6; border-radius: 12px; overflow: hidden; }
+    .boleta-header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 2rem; }
+    .boleta-header h1 { font-size: 1.5rem; }
+    .boleta-body { padding: 2rem; }
+    .boleta-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f1f3f5; }
+    .boleta-total { font-size: 1.3rem; font-weight: 800; border-top: 2px solid #1a1a2e; margin-top: 1rem; padding-top: 1rem; }
+    .boleta-footer { text-align: center; padding: 1.5rem; background: #f8f9fa; font-size: 0.85rem; color: #6c757d; }
+    @media print { .no-print { display: none !important; } .boleta { border: none; box-shadow: none; } }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<section class="section section--gray">
+    <div class="container">
+        <div class="no-print" style="text-align:center;margin-bottom:1rem;">
+            <button onclick="window.print()" class="btn btn--primary">🖨️ Imprimir Boleta</button>
+            <a href="{% url 'pedidos:detalle' pedido_id=pedido.pk %}" class="btn btn--outline">Volver al Pedido</a>
+        </div>
+
+        <div class="boleta">
+            <div class="boleta-header">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h1>MediStock</h1>
+                        <p>Distribuidora de Insumos Médicos</p>
+                        <p>RUT Emisor: {{ boleta.rut_emisor }}</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <h2>BOLETA ELECTRÓNICA</h2>
+                        <p style="font-size:1.2rem;font-weight:700;">Nº {{ boleta.numero_boleta }}</p>
+                        <p>Fecha: {{ boleta.emitida_en|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="boleta-body">
+                <div class="boleta-row"><span>Pedido</span><span>{{ pedido.numero_pedido }}</span></div>
+                {% if boleta.rut_receptor %}<div class="boleta-row"><span>RUT Cliente</span><span>{{ boleta.rut_receptor }}</span></div>{% endif %}
+                <div class="boleta-row"><span>Cliente</span><span>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</span></div>
+
+                <h3 style="margin:1.5rem 0 0.5rem;">Detalle</h3>
+                <table class="tabla" style="width:100%;">
+                    <thead><tr><th>Producto</th><th>Cant.</th><th>P. Unit.</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.producto.nombre }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>${{ item.precio_unitario|floatformat:0 }}</td>
+                            <td>${{ item.subtotal|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="boleta-row"><span>Monto Neto</span><span>${{ boleta.monto_neto|floatformat:0 }}</span></div>
+                <div class="boleta-row"><span>IVA (19%)</span><span>${{ boleta.monto_iva|floatformat:0 }}</span></div>
+                <div class="boleta-row boleta-total"><span>TOTAL</span><span>${{ boleta.monto_total|floatformat:0 }} CLP</span></div>
+            </div>
+            <div class="boleta-footer">
+                <p>Documento tributario electrónico — MediStock Distribuidora</p>
+                <p>Providencia, Santiago, Chile · contacto@medistock.cl</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+Hola {{ user.first_name|default:user.username }},
+
+¡Bienvenido(a) a MediStock! Gracias por crear una cuenta.
+
+Para completar tu registro y activar tu cuenta, por favor haz clic en el siguiente enlace:
+
+http://{{ domain }}{% url 'cuentas:activar_cuenta' uidb64=uid token=token %}
+
+Si no creaste esta cuenta, puedes ignorar este correo de forma segura.
+
+Saludos,
+El equipo de MediStock

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block titulo %}Contacto{% endblock %}
+{% block meta_descripcion %}Contacta a MediStock. Providencia, Santiago, Chile.{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">📞 Contacto</h1>
+        <p class="page-header__subtitle">Estamos aquí para ayudarte</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="contacto-grid">
+            <div class="contacto-info">
+                <div class="card">
+                    <h2 class="card__title">Información de Contacto</h2>
+                    <div class="contacto-item">
+                        <span class="contacto-item__icon">📍</span>
+                        <div>
+                            <strong>Dirección</strong>
+                            <p>Av. Providencia 1234, Providencia<br>Santiago, Región Metropolitana, Chile</p>
+                        </div>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="contacto-item__icon">📞</span>
+                        <div>
+                            <strong>Teléfono</strong>
+                            <p>+56 2 2239 2520</p>
+                        </div>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="contacto-item__icon">✉</span>
+                        <div>
+                            <strong>Email</strong>
+                            <p>contacto@medistock.cl</p>
+                        </div>
+                    </div>
+                    <div class="contacto-item">
+                        <span class="contacto-item__icon">🕐</span>
+                        <div>
+                            <strong>Horario</strong>
+                            <p>Lunes a Viernes: 8:00 — 18:00<br>Sábado: 9:00 — 13:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:1.5rem;">
+                    <h2 class="card__title">Centros de Distribución</h2>
+                    <ul style="display:flex;flex-direction:column;gap:0.8rem;">
+                        <li>🏪 <strong>BOD-RM1</strong> — Central Providencia, Santiago</li>
+                        <li>🏪 <strong>BOD-RM2</strong> — Maipú, Santiago</li>
+                        <li>🏪 <strong>BOD-RM3</strong> — Puente Alto, Santiago</li>
+                        <li>🏪 <strong>BOD-S1</strong> — Concepción, Biobío</li>
+                        <li>🏪 <strong>BOD-S2</strong> — Temuco, La Araucanía</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h2 class="card__title">Envíanos un Mensaje</h2>
+                    <form class="auth-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" class="form-control" placeholder="Tu nombre">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" placeholder="tu@email.com">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Asunto</label>
+                            <select class="form-control">
+                                <option>Consulta general</option>
+                                <option>Cotización B2B</option>
+                                <option>Soporte técnico</option>
+                                <option>Alianzas estratégicas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensaje</label>
+                            <textarea class="form-control" rows="5" placeholder="¿En qué podemos ayudarte?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">Enviar Mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section--dark">
+    <div class="container" style="text-align:center;">
+        <h2 style="margin-bottom:0.5rem;">¿Necesitas insumos médicos urgentes?</h2>
+        <p style="color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">Despacho express en 24 horas a todo Chile</p>
+        <a href="{% url 'productos:lista_productos' %}" class="btn btn--secondary btn--lg">Ver Catálogo →</a>
+    </div>
+</section>
+{% endblock %}

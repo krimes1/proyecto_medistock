@@ -101,3 +101,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
+# Email (consola en desarrollo, SMTP en produccion)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@medistock.cl'
+EMAIL_SUBJECT_PREFIX = '[MediStock] '

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pago Exitoso{% endblock %}
+
+{% block contenido %}
+<section class="section section--white" style="min-height:60vh;display:flex;align-items:center;">
+    <div class="container" style="max-width:650px;">
+        <div style="text-align:center;margin-bottom:2rem;">
+            <div class="confirmacion-icon" style="font-size:4rem;">✅</div>
+            <h1 style="font-size:2rem;margin:1rem 0;">¡Pago Exitoso!</h1>
+            <p class="text-muted">Tu pago ha sido procesado correctamente a través de WebPay Plus.</p>
+        </div>
+
+        <div class="card">
+            <h3 class="card__title">Detalles de la Transacción</h3>
+            <div class="carrito-resumen__linea"><span>Pedido</span><span><strong>{{ pedido.numero_pedido }}</strong></span></div>
+            <div class="carrito-resumen__linea"><span>Método</span><span>{{ pago.get_metodo_display }}</span></div>
+            <div class="carrito-resumen__linea"><span>ID Transacción</span><span><code>{{ pago.id_transaccion }}</code></span></div>
+            <div class="carrito-resumen__linea"><span>Código Autorización</span><span>{{ pago.codigo_autorizacion }}</span></div>
+            <div class="carrito-resumen__linea"><span>Tarjeta</span><span>XXXX-XXXX-XXXX-{{ pago.ultimos_cuatro }}</span></div>
+            <div class="carrito-resumen__total"><span>Monto Pagado</span><span>${{ pago.monto|floatformat:0 }} CLP</span></div>
+        </div>
+
+        {% if boleta %}
+        <div class="card" style="margin-top:1rem;">
+            <h3 class="card__title">📄 Boleta Electrónica</h3>
+            <div class="carrito-resumen__linea"><span>Nº Boleta</span><span>{{ boleta.numero_boleta }}</span></div>
+            <div class="carrito-resumen__linea"><span>Monto Neto</span><span>${{ boleta.monto_neto|floatformat:0 }}</span></div>
+            <div class="carrito-resumen__linea"><span>IVA (19%)</span><span>${{ boleta.monto_iva|floatformat:0 }}</span></div>
+            <div class="carrito-resumen__linea"><span>Total</span><span>${{ boleta.monto_total|floatformat:0 }}</span></div>
+            <a href="{% url 'pagos:ver_boleta' pedido_id=pedido.pk %}" class="btn btn--outline btn--sm" style="margin-top:0.5rem;">Ver Boleta Completa</a>
+        </div>
+        {% endif %}
+
+        <div style="display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap;">
+            <a href="{% url 'pedidos:detalle' pedido_id=pedido.pk %}" class="btn btn--primary">Ver Pedido</a>
+            <a href="{% url 'cuentas:mis_pedidos' %}" class="btn btn--outline">Mis Pedidos</a>
+            <a href="{% url 'productos:lista_productos' %}" class="btn btn--outline">Seguir Comprando</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

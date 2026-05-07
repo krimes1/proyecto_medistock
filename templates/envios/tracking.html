@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block titulo %}Seguimiento de Envío{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">📦 Seguimiento de Envío</h1>
+        <p class="page-header__subtitle">Consulta el estado de tu pedido en tiempo real</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container" style="max-width:700px;">
+        <div class="card">
+            <form method="get" class="tracking-form">
+                <label for="numero" style="font-weight:600;margin-bottom:0.5rem;display:block;">Número de Seguimiento</label>
+                <div style="display:flex;gap:0.5rem;">
+                    <input type="text" name="numero" id="numero" value="{{ numero }}"
+                           class="form-control" placeholder="Ej: CHX1A2B3C4D5E">
+                    <button type="submit" class="btn btn--primary">Buscar</button>
+                </div>
+            </form>
+        </div>
+
+        {% if numero %}
+            {% if envio %}
+            <div class="card" style="margin-top:1.5rem;">
+                <h2 class="card__title">Estado del Envío</h2>
+                <div class="tracking-info">
+                    <div class="tracking-info__row">
+                        <span>Nº Seguimiento</span>
+                        <strong>{{ envio.numero_seguimiento }}</strong>
+                    </div>
+                    <div class="tracking-info__row">
+                        <span>Transportista</span>
+                        <strong>{{ envio.get_transportista_display }}</strong>
+                    </div>
+                    <div class="tracking-info__row">
+                        <span>Estado</span>
+                        <span class="badge
+                            {% if envio.estado == 'entregado' %}badge--success
+                            {% elif envio.estado == 'en_transito' or envio.estado == 'en_reparto' %}badge--warning
+                            {% else %}badge--success{% endif %}"
+                            style="font-size:0.85rem;padding:0.3rem 0.8rem;">
+                            {{ envio.get_estado_display }}
+                        </span>
+                    </div>
+                    {% if envio.entrega_estimada %}
+                    <div class="tracking-info__row">
+                        <span>Entrega Estimada</span>
+                        <strong>{{ envio.entrega_estimada|date:"d/m/Y" }}</strong>
+                    </div>
+                    {% endif %}
+                    <div class="tracking-info__row">
+                        <span>Peso</span>
+                        <strong>{{ envio.peso_kg }} kg</strong>
+                    </div>
+                </div>
+            </div>
+
+            {% if eventos %}
+            <div class="card" style="margin-top:1.5rem;">
+                <h2 class="card__title">Historial de Tracking</h2>
+                <div class="tracking-timeline">
+                    {% for evento in eventos %}
+                    <div class="tracking-evento {% if forloop.first %}tracking-evento--actual{% endif %}">
+                        <div class="tracking-evento__punto"></div>
+                        <div class="tracking-evento__contenido">
+                            <h4>{{ evento.estado }}</h4>
+                            <p>{{ evento.descripcion }}</p>
+                            <div class="tracking-evento__meta">
+                                📍 {{ evento.ubicacion }} · {{ evento.fecha_hora|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="card" style="margin-top:1.5rem;text-align:center;">
+                <div style="font-size:3rem;">🔍</div>
+                <h3>Envío no encontrado</h3>
+                <p class="text-muted">No se encontró un envío con el número <strong>{{ numero }}</strong>. Verifica el número e intenta nuevamente.</p>
+            </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

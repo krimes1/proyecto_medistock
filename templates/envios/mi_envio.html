@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo %}Envío del Pedido {{ pedido.numero_pedido }}{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">📦 Envío del Pedido {{ pedido.numero_pedido }}</h1>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container" style="max-width:700px;">
+        {% if envio %}
+        <div class="card">
+            <h2 class="card__title">Información del Envío</h2>
+            <div class="tracking-info">
+                <div class="tracking-info__row"><span>Nº Seguimiento</span><strong>{{ envio.numero_seguimiento }}</strong></div>
+                <div class="tracking-info__row"><span>Transportista</span><strong>{{ envio.get_transportista_display }}</strong></div>
+                <div class="tracking-info__row">
+                    <span>Estado</span>
+                    <span class="badge {% if envio.estado == 'entregado' %}badge--success{% else %}badge--warning{% endif %}">{{ envio.get_estado_display }}</span>
+                </div>
+                {% if envio.entrega_estimada %}<div class="tracking-info__row"><span>Entrega Estimada</span><strong>{{ envio.entrega_estimada|date:"d/m/Y" }}</strong></div>{% endif %}
+                <div class="tracking-info__row"><span>Destino</span><strong>{{ pedido.ciudad_envio }}, {{ pedido.region_envio }}</strong></div>
+            </div>
+        </div>
+
+        {% if eventos %}
+        <div class="card" style="margin-top:1.5rem;">
+            <h2 class="card__title">Historial de Tracking</h2>
+            <div class="tracking-timeline">
+                {% for evento in eventos %}
+                <div class="tracking-evento {% if forloop.first %}tracking-evento--actual{% endif %}">
+                    <div class="tracking-evento__punto"></div>
+                    <div class="tracking-evento__contenido">
+                        <h4>{{ evento.estado }}</h4>
+                        <p>{{ evento.descripcion }}</p>
+                        <div class="tracking-evento__meta">📍 {{ evento.ubicacion }} · {{ evento.fecha_hora|date:"d/m/Y H:i" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="card" style="text-align:center;">
+            <div style="font-size:3rem;">📦</div>
+            <h3>Envío aún no despachado</h3>
+            <p class="text-muted">Tu pedido está siendo procesado. Una vez despachado, podrás ver el seguimiento aquí.</p>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1.5rem;text-align:center;">
+            <a href="{% url 'pedidos:detalle' pedido_id=pedido.pk %}" class="btn btn--outline">← Volver al Pedido</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block titulo %}Stock — {{ bodega.nombre }}{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">📦 {{ bodega.nombre }}</h1>
+        <p class="page-header__subtitle">{{ bodega.codigo }} · {{ bodega.ciudad }}, {{ bodega.region }}</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="tabla-responsive">
+            <table class="tabla">
+                <thead>
+                    <tr><th>Producto</th><th>SKU</th><th>Lote</th><th>Cantidad</th><th>Stock Mín.</th><th>Vencimiento</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.producto.nombre }}</td>
+                        <td><code>{{ item.producto.sku }}</code></td>
+                        <td>{{ item.numero_lote }}</td>
+                        <td><strong>{{ item.cantidad }}</strong></td>
+                        <td>{{ item.stock_minimo }}</td>
+                        <td>{{ item.fecha_vencimiento|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if item.esta_vencido %}
+                                <span class="badge badge--danger">Vencido</span>
+                            {% elif item.stock_bajo %}
+                                <span class="badge badge--warning">Bajo Stock</span>
+                            {% else %}
+                                <span class="badge badge--success">OK</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--outline" style="margin-top:1rem;">← Volver al Dashboard</a>
+    </div>
+</section>
+{% endblock %}

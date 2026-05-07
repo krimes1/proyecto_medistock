@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block titulo %}Seleccionar Método de Pago{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">💳 Método de Pago</h1>
+        <p class="page-header__subtitle">Pedido {{ pedido.numero_pedido }} — Total: ${{ pedido.total|floatformat:0 }} CLP</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container" style="max-width:700px;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="metodo-pago-grid">
+                <label class="metodo-pago-card">
+                    <input type="radio" name="metodo" value="webpay_credito" checked>
+                    <div class="metodo-pago-card__body">
+                        <div class="metodo-pago-card__icon">💳</div>
+                        <h3>WebPay Crédito</h3>
+                        <p>Paga con tu tarjeta de crédito a través de WebPay Plus</p>
+                        <span class="badge badge--success">Recomendado</span>
+                    </div>
+                </label>
+                <label class="metodo-pago-card">
+                    <input type="radio" name="metodo" value="webpay_debito">
+                    <div class="metodo-pago-card__body">
+                        <div class="metodo-pago-card__icon">🏦</div>
+                        <h3>WebPay Débito</h3>
+                        <p>Paga directamente desde tu cuenta bancaria</p>
+                    </div>
+                </label>
+                <label class="metodo-pago-card">
+                    <input type="radio" name="metodo" value="transferencia">
+                    <div class="metodo-pago-card__body">
+                        <div class="metodo-pago-card__icon">🔄</div>
+                        <h3>Transferencia Bancaria</h3>
+                        <p>Realiza una transferencia y un analista confirmará tu pago</p>
+                    </div>
+                </label>
+            </div>
+
+            <div class="card" style="margin-top:2rem;">
+                <h3>Resumen del Pedido</h3>
+                {% for item in items %}
+                <div class="checkout-item">
+                    <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                    <span>${{ item.subtotal|floatformat:0 }}</span>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="carrito-resumen__linea"><span>Subtotal</span><span>${{ pedido.subtotal|floatformat:0 }}</span></div>
+                <div class="carrito-resumen__linea"><span>Envío</span><span>${{ pedido.costo_envio|floatformat:0 }}</span></div>
+                <div class="carrito-resumen__linea"><span>IVA (19%)</span><span>${{ pedido.impuesto|floatformat:0 }}</span></div>
+                <div class="carrito-resumen__total"><span>Total a Pagar</span><span>${{ pedido.total|floatformat:0 }} CLP</span></div>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;margin-top:1.5rem;">
+                Pagar ${{ pedido.total|floatformat:0 }} CLP →
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

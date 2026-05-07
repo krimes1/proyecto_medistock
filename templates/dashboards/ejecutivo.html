@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block titulo %}Dashboard Ejecutivo{% endblock %}
+
+{% block contenido %}
+<section class="page-header page-header--dark">
+    <div class="container">
+        <h1 class="page-header__title">📊 Dashboard — Ejecutivo de Cuentas</h1>
+        <p class="page-header__subtitle">Stock multi-bodega y gestión de pedidos</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <!-- Bodegas -->
+        <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin-bottom:1.5rem;">🏪 Stock por Bodega</h2>
+        <div class="dashboard-cards">
+            {% for bodega in bodegas %}
+            <div class="dashboard-card">
+                <div class="dashboard-card__header">
+                    <h3>{{ bodega.nombre }}</h3>
+                    <span class="badge badge--success">{{ bodega.codigo }}</span>
+                </div>
+                <div class="dashboard-card__body">
+                    <div class="dashboard-card__stat">
+                        <span class="dashboard-card__numero">{{ bodega.total_items|default:0 }}</span>
+                        <span>Unidades totales</span>
+                    </div>
+                    <div class="dashboard-card__stat">
+                        <span class="dashboard-card__numero" style="color:var(--warning);">{{ bodega.productos_bajo_stock }}</span>
+                        <span>Bajo stock</span>
+                    </div>
+                </div>
+                <a href="{% url 'dashboards:stock_bodega' bodega_id=bodega.pk %}" class="btn btn--sm btn--outline" style="width:100%;justify-content:center;">Ver Detalle</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pedidos Pendientes -->
+        <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin:3rem 0 1.5rem;">
+            📋 Pedidos Pendientes de Aprobación
+            <span class="badge badge--warning" style="font-size:0.8rem;">{{ total_pendientes }}</span>
+        </h2>
+        {% if pedidos_pendientes %}
+        <div class="tabla-responsive">
+            <table class="tabla">
+                <thead>
+                    <tr><th>Nº Pedido</th><th>Cliente</th><th>Prioridad</th><th>Total</th><th>Fecha</th><th>Acción</th></tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos_pendientes %}
+                    <tr>
+                        <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                        <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                        <td>
+                            <span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.prioridad == 'urgente' %}badge--warning{% else %}badge--success{% endif %}">
+                                {{ pedido.get_prioridad_display }}
+                            </span>
+                        </td>
+                        <td>${{ pedido.total|floatformat:0 }}</td>
+                        <td>{{ pedido.creado_en|date:"d/m H:i" }}</td>
+                        <td>
+                            <a href="{% url 'dashboards:aprobar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">✓ Aprobar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No hay pedidos pendientes de aprobación.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

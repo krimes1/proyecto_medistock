@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block titulo %}Checkout{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">📋 Checkout</h1>
+        <p class="page-header__subtitle">Completa tu pedido</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <form method="post" class="checkout-layout">
+            {% csrf_token %}
+            <div class="checkout-form">
+                <div class="card">
+                    <h2 class="card__title">📍 Dirección de Envío</h2>
+                    <div class="form-group">
+                        <label for="direccion">Dirección</label>
+                        <textarea name="direccion" id="direccion" class="form-control" rows="2" required
+                                  placeholder="Av. Ejemplo 1234, Depto 5">{% if request.user.perfil.direccion %}{{ request.user.perfil.direccion }}{% endif %}</textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ciudad">Ciudad</label>
+                            <input type="text" name="ciudad" id="ciudad" class="form-control" required
+                                   value="{{ request.user.perfil.ciudad }}" placeholder="Santiago">
+                        </div>
+                        <div class="form-group">
+                            <label for="region">Región</label>
+                            <input type="text" name="region" id="region" class="form-control" required
+                                   value="{{ request.user.perfil.region }}" placeholder="Región Metropolitana">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card__title">🚚 Tipo de Despacho</h2>
+                    <div class="despacho-opciones">
+                        <label class="despacho-opcion">
+                            <input type="radio" name="tipo_despacho" value="normal" checked>
+                            <div class="despacho-opcion__card">
+                                <h4>📦 Despacho Normal</h4>
+                                <p>5-7 días hábiles</p>
+                                <span class="despacho-opcion__precio">$2.990</span>
+                            </div>
+                        </label>
+                        <label class="despacho-opcion">
+                            <input type="radio" name="tipo_despacho" value="express">
+                            <div class="despacho-opcion__card">
+                                <h4>⚡ Despacho Express</h4>
+                                <p>1-3 días hábiles</p>
+                                <span class="despacho-opcion__precio">$5.990</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card__title">🏥 Prioridad Médica</h2>
+                    <select name="prioridad" class="form-control">
+                        <option value="normal">Normal</option>
+                        <option value="urgente">Urgente</option>
+                        <option value="critico">Crítico — Urgencia Médica</option>
+                    </select>
+                </div>
+
+                <div class="card">
+                    <h2 class="card__title">📦 Bodega de Origen</h2>
+                    <select name="bodega" class="form-control">
+                        <option value="">Automática (más cercana)</option>
+                        {% for bodega in bodegas %}
+                        <option value="{{ bodega.pk }}">{{ bodega.nombre }} — {{ bodega.ciudad }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="card">
+                    <h2 class="card__title">📝 Notas</h2>
+                    <textarea name="notas" class="form-control" rows="2" placeholder="Instrucciones especiales..."></textarea>
+                </div>
+            </div>
+
+            <div class="checkout-resumen">
+                <div class="carrito-resumen__card">
+                    <h3>Resumen del Pedido</h3>
+                    {% for item in items %}
+                    <div class="checkout-item">
+                        <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+                        <span>${{ item.subtotal|floatformat:0 }}</span>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="carrito-resumen__linea">
+                        <span>Subtotal</span>
+                        <span>${{ carrito.total|floatformat:0 }}</span>
+                    </div>
+                    <div class="carrito-resumen__linea">
+                        <span>Envío</span>
+                        <span id="costo-envio">$2.990</span>
+                    </div>
+                    <div class="carrito-resumen__linea">
+                        <span>IVA (19%)</span>
+                        <span>Calculado al confirmar</span>
+                    </div>
+                    <div class="carrito-resumen__total">
+                        <span>Total estimado</span>
+                        <span>${{ carrito.total|floatformat:0 }}+ envío + IVA</span>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">
+                        Confirmar y Pagar →
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% block js_extra %}
+<script>
+document.querySelectorAll('input[name="tipo_despacho"]').forEach(radio => {
+    radio.addEventListener('change', e => {
+        document.getElementById('costo-envio').textContent =
+            e.target.value === 'express' ? '$5.990' : '$2.990';
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

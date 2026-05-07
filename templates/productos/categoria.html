@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ categoria.nombre }}{% endblock %}
+{% block meta_descripcion %}{{ categoria.descripcion }} - MediStock{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <div class="breadcrumb" style="margin-bottom:0.5rem;">
+            <a href="{% url 'productos:lista_productos' %}">Catálogo</a> &raquo;
+            <span>{{ categoria.nombre }}</span>
+        </div>
+        <h1 class="page-header__title">{{ categoria.nombre }}</h1>
+        <p class="page-header__subtitle">{{ categoria.descripcion }}</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="products-grid">
+            {% for producto in productos %}
+            <a href="{{ producto.get_absolute_url }}" class="product-card">
+                {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-card__image">
+                {% else %}
+                <div class="product-card__image product-card__image--placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0A6EBD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                </div>
+                {% endif %}
+                <div class="product-card__body">
+                    <h3 class="product-card__name">{{ producto.nombre }}</h3>
+                    <div class="product-card__sku">SKU: {{ producto.sku }}</div>
+                    {% if producto.en_stock %}
+                        <span class="badge badge--success">En Stock</span>
+                    {% else %}
+                        <span class="badge badge--danger">Sin Stock</span>
+                    {% endif %}
+                    <div class="product-card__footer">
+                        <div class="product-card__price">${{ producto.precio|floatformat:0 }} <small>CLP</small></div>
+                        <div class="product-card__btn">+</div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="empty-state">
+                <h3>Sin productos en esta categoría</h3>
+                <a href="{% url 'productos:lista_productos' %}" class="btn btn--primary">Ver todo el catálogo</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

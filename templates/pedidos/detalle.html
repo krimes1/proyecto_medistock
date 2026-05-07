@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pedido {{ pedido.numero_pedido }}{% endblock %}
+
+{% block contenido %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-header__title">Pedido {{ pedido.numero_pedido }}</h1>
+        <p class="page-header__subtitle">Creado el {{ pedido.creado_en|date:"d/m/Y H:i" }}</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div class="pedido-layout">
+            <div class="pedido-info">
+                <div class="card">
+                    <h2 class="card__title">Estado del Pedido</h2>
+                    <div class="pedido-estado">
+                        <span class="badge {% if pedido.estado == 'entregado' %}badge--success{% elif pedido.estado == 'cancelado' %}badge--danger{% else %}badge--warning{% endif %}" style="font-size:1rem;padding:0.5rem 1.5rem;">
+                            {{ pedido.get_estado_display }}
+                        </span>
+                        <span class="badge badge--success" style="font-size:0.85rem;">{{ pedido.get_prioridad_display }}</span>
+                    </div>
+                    {% if pedido.numero_seguimiento %}
+                    <div style="margin-top:1rem;">
+                        <strong>Tracking:</strong> {{ pedido.numero_seguimiento }}
+                        <a href="{% url 'envios:mi_envio' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary" style="margin-left:0.5rem;">Ver Envío</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card">
+                    <h2 class="card__title">Productos</h2>
+                    <table class="tabla">
+                        <thead>
+                            <tr><th>Producto</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.producto.nombre }}<br><small class="text-muted">SKU: {{ item.producto.sku }}</small></td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>${{ item.precio_unitario|floatformat:0 }}</td>
+                                <td><strong>${{ item.subtotal|floatformat:0 }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2 class="card__title">Dirección de Envío</h2>
+                    <p>{{ pedido.direccion_envio }}<br>{{ pedido.ciudad_envio }}, {{ pedido.region_envio }}</p>
+                    <p><strong>Tipo de despacho:</strong> {{ pedido.get_tipo_despacho_display }}</p>
+                </div>
+            </div>
+
+            <div class="pedido-resumen">
+                <div class="carrito-resumen__card">
+                    <h3>Resumen</h3>
+                    <div class="carrito-resumen__linea"><span>Subtotal</span><span>${{ pedido.subtotal|floatformat:0 }}</span></div>
+                    <div class="carrito-resumen__linea"><span>Envío</span><span>${{ pedido.costo_envio|floatformat:0 }}</span></div>
+                    <div class="carrito-resumen__linea"><span>IVA (19%)</span><span>${{ pedido.impuesto|floatformat:0 }}</span></div>
+                    <div class="carrito-resumen__total"><span>Total</span><span>${{ pedido.total|floatformat:0 }} CLP</span></div>
+                    {% if pedido.estado == 'pendiente' %}
+                    <a href="{% url 'pagos:iniciar_pago' pedido_id=pedido.pk %}" class="btn btn--primary" style="width:100%;justify-content:center;">Pagar Ahora</a>
+                    {% endif %}
+                    {% if pedido.pago.estado == 'completado' %}
+                    <a href="{% url 'pagos:ver_boleta' pedido_id=pedido.pk %}" class="btn btn--outline btn--sm" style="width:100%;justify-content:center;margin-top:0.5rem;">Ver Boleta</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

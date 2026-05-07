@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar Sesión{% endblock %}
+
+{% block contenido %}
+<section class="section section--white" style="min-height:70vh;display:flex;align-items:center;">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-card__header">
+                <svg viewBox="0 0 40 40" fill="none" width="50" height="50"><rect width="40" height="40" rx="10" fill="#0A6EBD"/><path d="M20 8v24M8 20h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>
+                <h1>Iniciar Sesión</h1>
+                <p>Accede a tu cuenta MediStock</p>
+            </div>
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">Usuario</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password">Contraseña</label>
+                    {{ form.password }}
+                </div>
+                {% if form.errors %}
+                <div class="alert alert--danger">
+                    Usuario o contraseña incorrectos. Intente nuevamente.
+                </div>
+                {% endif %}
+                <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">Ingresar</button>
+            </form>
+            <div class="auth-card__footer">
+                <p>¿No tienes cuenta? <a href="{% url 'cuentas:registro' %}">Regístrate aquí</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
