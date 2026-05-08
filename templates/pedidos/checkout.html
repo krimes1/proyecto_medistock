@@ -25,13 +25,19 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ciudad">Ciudad</label>
-                            <input type="text" name="ciudad" id="ciudad" class="form-control" required
-                                   value="{{ request.user.perfil.ciudad }}" placeholder="Santiago">
+                            <select name="ciudad" id="ciudad" class="form-control" required>
+                                {% for valor, texto in ciudades %}
+                                <option value="{{ valor }}" {% if request.user.perfil.ciudad == valor %}selected{% endif %}>{{ texto }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="region">Región</label>
-                            <input type="text" name="region" id="region" class="form-control" required
-                                   value="{{ request.user.perfil.region }}" placeholder="Región Metropolitana">
+                            <select name="region" id="region" class="form-control" required>
+                                {% for valor, texto in regiones %}
+                                <option value="{{ valor }}" {% if request.user.perfil.region == valor %}selected{% endif %}>{{ texto }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </div>

@@ -18,5 +18,10 @@ class UsuarioAdmin(BaseUserAdmin):
         return obj.perfil.get_rol_display() if hasattr(obj, 'perfil') else '-'
     obtener_rol.short_description = 'Rol'
 
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return []
+        return super().get_inline_instances(request, obj)
+
 admin.site.unregister(User)
 admin.site.register(User, UsuarioAdmin)

@@ -12,7 +12,7 @@
 <body>
     <div class="navbar__top">
         <div class="container">
-            <span>📍 Providencia, Santiago — Lun-Vie 8:00 a 18:00</span>
+            <span>📍 Antonio Varas 666, 7500961 Providencia, Región Metropolitana — Lun-Vie 8:00 a 18:00</span>
             <div>
                 <a href="tel:+56222392520">📞 +56 2 2239 2520</a> &nbsp;|&nbsp;
                 <a href="mailto:contacto@medistock.cl">✉ contacto@medistock.cl</a>
@@ -40,9 +40,12 @@
                         {% if cantidad_items_carrito %}<span class="navbar__cart-badge">{{ cantidad_items_carrito }}</span>{% endif %}
                     </a>
                     {% if user.is_authenticated %}
-                        <div class="user-menu" style="position:relative;display:inline-block;">
-                            <a href="{% url 'cuentas:perfil' %}" class="btn btn--sm btn--outline">
+                        <div class="user-menu" style="position:relative;display:inline-block; display:flex; align-items:center; gap:0.5rem;">
+                            <a href="{% url 'cuentas:perfil' %}" class="btn btn--sm btn--outline" title="Mi Perfil">
                                 👤 {{ user.first_name|default:user.username }}
+                            </a>
+                            <a href="{% url 'cuentas:mis_pedidos' %}" class="btn btn--sm btn--outline" style="border-color:transparent;" title="Mis Pedidos">
+                                📦 Mis Pedidos
                             </a>
                         </div>
                         {% if user.perfil.rol == 'administrador' %}
@@ -58,7 +61,7 @@
                     {% else %}
                         <a href="{% url 'cuentas:login' %}" class="btn btn--sm btn--primary">Ingresar</a>
                     {% endif %}
-                    <button class="navbar__toggle" onclick="document.getElementById('navLinks').classList.toggle('navbar__links--active')">
+                        <button class="navbar__toggle" onclick="document.getElementById('navLinks').classList.toggle('navbar__links--active')">
                         <span></span><span></span><span></span>
                     </button>
                 </div>
@@ -81,29 +84,29 @@
             <div class="footer__grid">
                 <div>
                     <div class="footer__brand-name">Medi<span>Stock</span></div>
-                    <p class="footer__text">Distribuidora de insumos medicos establecida en Providencia. Abastecemos clinicas (B2B) y pacientes particulares (B2C).</p>
+                    <p class="footer__text">Distribuidora de insumos médicos establecida en Providencia. Abastecemos clínicas (B2B) y pacientes particulares (B2C).</p>
                 </div>
                 <div>
-                    <h4 class="footer__heading">Navegacion</h4>
+                    <h4 class="footer__heading">Navegación</h4>
                     <ul class="footer__links">
                         <li><a href="{% url 'core:inicio' %}">Inicio</a></li>
-                        <li><a href="{% url 'productos:lista_productos' %}">Catalogo</a></li>
+                        <li><a href="{% url 'productos:lista_productos' %}">Catálogo</a></li>
                         <li><a href="{% url 'core:nosotros' %}">Nosotros</a></li>
                         <li><a href="{% url 'core:contacto' %}">Contacto</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="footer__heading">Categorias</h4>
+                    <h4 class="footer__heading">Categorías</h4>
                     <ul class="footer__links">
                         <li><a href="#">Descartables</a></li>
-                        <li><a href="#">Quirurgicos</a></li>
+                        <li><a href="#">Quirúrgicos</a></li>
                         <li><a href="#">Equipamiento</a></li>
                         <li><a href="#">Laboratorio</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="footer__heading">Contacto</h4>
-                    <div class="footer__contact-item">📍 Providencia, Santiago, Chile</div>
+                    <div class="footer__contact-item">📍 Antonio Varas 666, 7500961 Providencia, Región Metropolitana</div>
                     <div class="footer__contact-item">📞 +56 2 2239 2520</div>
                     <div class="footer__contact-item">✉ contacto@medistock.cl</div>
                 </div>

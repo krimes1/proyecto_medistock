@@ -25,12 +25,6 @@ class FormularioRegistro(forms.ModelForm):
         label='Confirmar Contraseña',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repetir contraseña'})
     )
-    rol = forms.ChoiceField(
-        choices=[('paciente', 'Paciente'), ('institucion', 'Institución / Clínica')],
-        label='Tipo de cuenta',
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'username']
@@ -52,10 +46,54 @@ class FormularioRegistro(forms.ModelForm):
         user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
-            user.perfil.rol = self.cleaned_data['rol']
+            user.perfil.rol = 'paciente'
             user.perfil.save()
         return user
 
+
+REGIONES_CHILE = [
+    ('', 'Seleccione una región...'),
+    ('Arica y Parinacota', 'Arica y Parinacota'),
+    ('Tarapacá', 'Tarapacá'),
+    ('Antofagasta', 'Antofagasta'),
+    ('Atacama', 'Atacama'),
+    ('Coquimbo', 'Coquimbo'),
+    ('Valparaíso', 'Valparaíso'),
+    ('Metropolitana de Santiago', 'Metropolitana de Santiago'),
+    ('O\'Higgins', 'O\'Higgins'),
+    ('Maule', 'Maule'),
+    ('Ñuble', 'Ñuble'),
+    ('Biobío', 'Biobío'),
+    ('La Araucanía', 'La Araucanía'),
+    ('Los Ríos', 'Los Ríos'),
+    ('Los Lagos', 'Los Lagos'),
+    ('Aysén', 'Aysén'),
+    ('Magallanes', 'Magallanes'),
+]
+
+CIUDADES_CHILE = [
+    ('', 'Seleccione una ciudad...'),
+    ('Arica', 'Arica'),
+    ('Iquique', 'Iquique'),
+    ('Antofagasta', 'Antofagasta'),
+    ('Copiapó', 'Copiapó'),
+    ('La Serena', 'La Serena'),
+    ('Coquimbo', 'Coquimbo'),
+    ('Valparaíso', 'Valparaíso'),
+    ('Viña del Mar', 'Viña del Mar'),
+    ('Santiago', 'Santiago'),
+    ('Providencia', 'Providencia'),
+    ('Maipú', 'Maipú'),
+    ('Puente Alto', 'Puente Alto'),
+    ('Rancagua', 'Rancagua'),
+    ('Talca', 'Talca'),
+    ('Chillán', 'Chillán'),
+    ('Concepción', 'Concepción'),
+    ('Temuco', 'Temuco'),
+    ('Valdivia', 'Valdivia'),
+    ('Puerto Montt', 'Puerto Montt'),
+    ('Punta Arenas', 'Punta Arenas'),
+]
 
 class FormularioPerfil(forms.ModelForm):
     first_name = forms.CharField(
@@ -78,8 +116,8 @@ class FormularioPerfil(forms.ModelForm):
             'rut': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '12.345.678-9'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+56 9 1234 5678'}),
             'direccion': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'ciudad': forms.TextInput(attrs={'class': 'form-control'}),
-            'region': forms.TextInput(attrs={'class': 'form-control'}),
+            'ciudad': forms.Select(choices=CIUDADES_CHILE, attrs={'class': 'form-control'}),
+            'region': forms.Select(choices=REGIONES_CHILE, attrs={'class': 'form-control'}),
             'razon_social': forms.TextInput(attrs={'class': 'form-control'}),
             'rut_empresa': forms.TextInput(attrs={'class': 'form-control'}),
         }

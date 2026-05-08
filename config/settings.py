@@ -102,7 +102,12 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-# Email (consola en desarrollo, SMTP en produccion)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'no-reply@medistock.cl'
+# Configuración de correos con Gmail SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'medistock.soporte@gmail.com'
+EMAIL_HOST_PASSWORD = 'elkmblejkejlpyta'
+DEFAULT_FROM_EMAIL = 'MediStock <medistock.soporte@gmail.com>'
 EMAIL_SUBJECT_PREFIX = '[MediStock] '

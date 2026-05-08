@@ -71,10 +71,13 @@ def checkout(request):
         # Redirigir a pago
         return redirect('pagos:iniciar_pago', pedido_id=pedido.pk)
 
+    from cuentas.forms import REGIONES_CHILE, CIUDADES_CHILE
     contexto = {
         'carrito': carrito,
         'items': items,
         'bodegas': bodegas,
+        'regiones': REGIONES_CHILE,
+        'ciudades': CIUDADES_CHILE,
     }
     return render(request, 'pedidos/checkout.html', contexto)
 
