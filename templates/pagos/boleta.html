@@ -58,6 +58,9 @@
                     </tbody>
                 </table>
 
+                {% if pedido.descuento > 0 %}
+                <div class="boleta-row" style="color:var(--danger);"><span>Descuento (Vendedor)</span><span>-${{ pedido.descuento|floatformat:0 }}</span></div>
+                {% endif %}
                 <div class="boleta-row"><span>Monto Neto</span><span>${{ boleta.monto_neto|floatformat:0 }}</span></div>
                 <div class="boleta-row"><span>IVA (19%)</span><span>${{ boleta.monto_iva|floatformat:0 }}</span></div>
                 <div class="boleta-row boleta-total"><span>TOTAL</span><span>${{ boleta.monto_total|floatformat:0 }} CLP</span></div>

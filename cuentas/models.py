@@ -11,6 +11,7 @@ class PerfilUsuario(models.Model):
         ('ejecutivo', 'Ejecutivo de Cuentas'),
         ('logistica', 'Operador Logistico'),
         ('analista', 'Analista de Finanzas'),
+        ('vendedor', 'Vendedor de Insumos'),
         ('institucion', 'Institucion / Clinica'),
         ('paciente', 'Paciente'),
     ]
@@ -25,6 +26,8 @@ class PerfilUsuario(models.Model):
     # Campos B2B (solo instituciones)
     razon_social = models.CharField(max_length=200, blank=True, verbose_name='Razon Social')
     rut_empresa = models.CharField(max_length=12, blank=True, verbose_name='RUT Empresa')
+    # Campo para el Vendedor
+    codigo_vendedor = models.CharField(max_length=20, blank=True, unique=True, null=True, verbose_name='Codigo de Vendedor')
 
     class Meta:
         verbose_name = 'Perfil de Usuario'
@@ -35,7 +38,7 @@ class PerfilUsuario(models.Model):
 
     @property
     def es_interno(self):
-        return self.rol in ('administrador', 'ejecutivo', 'logistica', 'analista')
+        return self.rol in ('administrador', 'ejecutivo', 'logistica', 'analista', 'vendedor')
 
     @property
     def es_cliente(self):
@@ -50,4 +53,11 @@ def crear_perfil_usuario(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def guardar_perfil_usuario(sender, instance, **kwargs):
     if hasattr(instance, 'perfil'):
+        # Auto-generar codigo si es vendedor y no tiene
+        if instance.perfil.rol == 'vendedor' and not instance.perfil.codigo_vendedor:
+            import random
+            import string
+            base = instance.username[:4].upper()
+            aleatorio = ''.join(random.choices(string.digits, k=4))
+            instance.perfil.codigo_vendedor = f"VEN-{base}-{aleatorio}"
         instance.perfil.save()

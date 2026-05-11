@@ -1,11 +1,13 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+from .emails import enviar_notificacion_estado
 
 
 class Pedido(models.Model):
     """Pedido de compra."""
     OPCIONES_ESTADO = [
-        ('pendiente', 'Pendiente'),
+        ('pendiente', 'Por Aprobación del Ejecutivo'),
         ('aprobado', 'Aprobado por Ejecutivo'),
         ('preparando', 'En Preparacion'),
         ('despachado', 'Despachado'),
@@ -32,9 +34,11 @@ class Pedido(models.Model):
     ciudad_envio = models.CharField(max_length=100, verbose_name='Ciudad')
     region_envio = models.CharField(max_length=100, verbose_name='Region')
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Subtotal')
+    descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Descuento')
     costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Costo de Envio')
     impuesto = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='IVA')
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Total')
+    vendedor = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='ventas', null=True, blank=True, verbose_name='Vendedor (Referido)')
     numero_seguimiento = models.CharField(max_length=100, blank=True, verbose_name='Nro de Seguimiento')
     notas = models.TextField(blank=True, verbose_name='Notas')
     creado_en = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Creacion')
@@ -51,11 +55,34 @@ class Pedido(models.Model):
     def __str__(self):
         return f"Pedido {self.numero_pedido} - {self.get_estado_display()}"
 
+    def clean(self):
+        super().clean()
+        if self.pk:
+            old_estado = Pedido.objects.get(pk=self.pk).estado
+            if self.estado in ['preparando', 'despachado', 'entregado']:
+                if old_estado == 'pendiente' and self.estado != 'aprobado':
+                    raise ValidationError({'estado': 'El pedido no puede estar listo o en proceso sin las aprobaciones necesarias.'})
+
     def save(self, *args, **kwargs):
+        self.clean()
+        is_new = self.pk is None
+        old_estado = None
+        if not is_new:
+            old_estado = Pedido.objects.get(pk=self.pk).estado
+
         if not self.numero_pedido:
             import uuid
             self.numero_pedido = f"MS-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
+
+        if not is_new and old_estado != self.estado:
+            # Avoid sending state change if it's approved and we just bought it, 
+            # because the purchase boleta email covers it. But as per requirement:
+            # "también cada vez que cambie el estado de su pedido o sea aprobado por alguien"
+            # It's better to just send it. 
+            # Or if old_estado == 'pendiente' and self.estado == 'aprobado': we could skip,
+            # but we will send it as requested.
+            enviar_notificacion_estado(self, old_estado)
 
 
 class ItemPedido(models.Model):

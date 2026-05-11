@@ -87,6 +87,15 @@
                     <h2 class="card__title">📝 Notas</h2>
                     <textarea name="notas" class="form-control" rows="2" placeholder="Instrucciones especiales..."></textarea>
                 </div>
+                
+                <div class="card" style="border: 2px dashed var(--primary-color);">
+                    <h2 class="card__title" style="color: var(--primary-color);">🎁 Código de Vendedor / Descuento</h2>
+                    <p style="font-size: 0.9rem; margin-bottom: 1rem; color: #666;">Ingresa el código de tu vendedor asignado para obtener un 5% de descuento en el subtotal de tu compra.</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="codigo_vendedor_input" name="codigo_vendedor" class="form-control" placeholder="Ingresa tu código aquí" value="{{ codigo_vendedor_sesion }}">
+                        <button type="button" id="btn-aplicar-codigo" class="btn btn--secondary">Aplicar</button>
+                    </div>
+                </div>
             </div>
 
             <div class="checkout-resumen">
@@ -101,19 +110,23 @@
                     <hr>
                     <div class="carrito-resumen__linea">
                         <span>Subtotal</span>
-                        <span>${{ carrito.total|floatformat:0 }}</span>
+                        <span id="ui-subtotal" data-valor="{{ carrito.total|stringformat:'f' }}">${{ carrito.total|floatformat:0 }}</span>
+                    </div>
+                    <div class="carrito-resumen__linea" id="linea-descuento" style="display: none; color: var(--danger);">
+                        <span>Descuento Vendedor (5%)</span>
+                        <span id="ui-descuento">-$0</span>
                     </div>
                     <div class="carrito-resumen__linea">
                         <span>Envío</span>
-                        <span id="costo-envio">$2.990</span>
+                        <span id="ui-costo-envio" data-valor="2990">$2.990</span>
                     </div>
                     <div class="carrito-resumen__linea">
                         <span>IVA (19%)</span>
-                        <span>Calculado al confirmar</span>
+                        <span id="ui-iva">Calculado al confirmar</span>
                     </div>
                     <div class="carrito-resumen__total">
                         <span>Total estimado</span>
-                        <span>${{ carrito.total|floatformat:0 }}+ envío + IVA</span>
+                        <span id="ui-total">${{ carrito.total|floatformat:0 }}+ envío + IVA</span>
                     </div>
                     <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">
                         Confirmar y Pagar →
@@ -126,11 +139,77 @@
 
 {% block js_extra %}
 <script>
+// Manejo del costo de envío
 document.querySelectorAll('input[name="tipo_despacho"]').forEach(radio => {
     radio.addEventListener('change', e => {
-        document.getElementById('costo-envio').textContent =
-            e.target.value === 'express' ? '$5.990' : '$2.990';
+        const costo = e.target.value === 'express' ? 5990 : 2990;
+        const elemEnvio = document.getElementById('ui-costo-envio');
+        elemEnvio.dataset.valor = costo;
+        elemEnvio.textContent = '$' + costo.toLocaleString('es-CL');
+        actualizarTotalesUI();
     });
+});
+
+// Validación del código por AJAX
+const btnAplicar = document.getElementById('btn-aplicar-codigo');
+const inputCodigo = document.getElementById('codigo_vendedor_input');
+let descuentoPorcentaje = 0;
+
+function actualizarTotalesUI() {
+    const subtotal = parseFloat(document.getElementById('ui-subtotal').dataset.valor.replace(',', '.'));
+    const envio = parseFloat(document.getElementById('ui-costo-envio').dataset.valor);
+    
+    const descuento = subtotal * descuentoPorcentaje;
+    const subtotalDescuento = subtotal - descuento;
+    const iva = Math.round(subtotalDescuento * 0.19);
+    const total = subtotalDescuento + envio + iva;
+
+    // Actualizar Textos
+    if (descuento > 0) {
+        document.getElementById('linea-descuento').style.display = 'flex';
+        document.getElementById('ui-descuento').textContent = '-$' + Math.round(descuento).toLocaleString('es-CL');
+    } else {
+        document.getElementById('linea-descuento').style.display = 'none';
+    }
+    
+    document.getElementById('ui-iva').textContent = '$' + iva.toLocaleString('es-CL');
+    document.getElementById('ui-total').textContent = '$' + total.toLocaleString('es-CL');
+}
+
+function validarCodigo() {
+    const codigo = inputCodigo.value.trim();
+    if (!codigo) {
+        descuentoPorcentaje = 0;
+        actualizarTotalesUI();
+        return;
+    }
+    
+    fetch(`{% url 'pedidos:validar_vendedor' %}?codigo=${encodeURIComponent(codigo)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.valido) {
+                descuentoPorcentaje = 0.05;
+                actualizarTotalesUI();
+                alert(data.mensaje + '\\n\\nVendedor Asignado: ' + data.vendedor);
+            } else {
+                descuentoPorcentaje = 0;
+                actualizarTotalesUI();
+                alert(data.mensaje);
+                inputCodigo.value = '';
+            }
+        })
+        .catch(err => console.error(err));
+}
+
+btnAplicar.addEventListener('click', validarCodigo);
+
+// Si ya viene con código en la sesión, validarlo de inmediato al cargar
+window.addEventListener('DOMContentLoaded', () => {
+    if (inputCodigo.value.trim() !== '') {
+        validarCodigo();
+    } else {
+        actualizarTotalesUI();
+    }
 });
 </script>
 {% endblock %}

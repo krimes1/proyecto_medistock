@@ -60,6 +60,9 @@
                 <div class="carrito-resumen__card">
                     <h3>Resumen</h3>
                     <div class="carrito-resumen__linea"><span>Subtotal</span><span>${{ pedido.subtotal|floatformat:0 }}</span></div>
+                    {% if pedido.descuento > 0 %}
+                    <div class="carrito-resumen__linea" style="color:var(--danger);"><span>Descuento Vendedor</span><span>-${{ pedido.descuento|floatformat:0 }}</span></div>
+                    {% endif %}
                     <div class="carrito-resumen__linea"><span>Envío</span><span>${{ pedido.costo_envio|floatformat:0 }}</span></div>
                     <div class="carrito-resumen__linea"><span>IVA (19%)</span><span>${{ pedido.impuesto|floatformat:0 }}</span></div>
                     <div class="carrito-resumen__total"><span>Total</span><span>${{ pedido.total|floatformat:0 }} CLP</span></div>

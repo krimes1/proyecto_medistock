@@ -11,7 +11,9 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from cuentas.decorators import rol_requerido
 from pedidos.models import Pedido
+from pedidos.emails import enviar_boleta_compra
 from pagos.models import Pago
+from pagos.services import generar_boleta
 from productos.models import Producto
 from inventario.models import ItemStock, Bodega
 from envios.models import Envio
@@ -168,12 +170,19 @@ def confirmar_transferencia(request, pago_id):
     pago.completado_en = timezone.now()
     pago.save()
 
-    # Actualizar pedido
-    pago.pedido.estado = 'aprobado'
-    pago.pedido.aprobado_en = timezone.now()
-    pago.pedido.save()
+    # Registrar que el pago fue exitoso sin cambiar el estado del pedido,
+    # para que el Ejecutivo lo apruebe manualmente.
+    # pago.pedido.estado = 'aprobado'
+    # pago.pedido.aprobado_en = timezone.now()
+    # pago.pedido.save()
 
-    messages.success(request, f'Transferencia confirmada para pedido {pago.pedido.numero_pedido}.')
+    # Generar boleta electrónica
+    boleta = generar_boleta(pago)
+    
+    # Enviar correo al usuario con la boleta
+    enviar_boleta_compra(pago.pedido, pago, boleta)
+
+    messages.success(request, f'Transferencia confirmada y boleta generada para pedido {pago.pedido.numero_pedido}.')
     return redirect('dashboards:analista')
 
 
@@ -214,3 +223,26 @@ def dashboard_administrador(request):
         'bajo_stock': bajo_stock,
     }
     return render(request, 'dashboards/administrador.html', contexto)
+
+
+# ============================================================
+# VENDEDOR DE INSUMOS
+# ============================================================
+@rol_requerido('vendedor', 'administrador')
+def dashboard_vendedor(request):
+    """Dashboard Vendedor: Monitoreo de referidos, ventas y comisiones."""
+    pedidos = Pedido.objects.filter(vendedor=request.user).order_by('-creado_en')
+    
+    total_ventas = pedidos.filter(estado__in=['aprobado', 'preparando', 'despachado', 'entregado']).aggregate(
+        total=Sum('subtotal')
+    )['total'] or 0
+
+    # Comisión simulada del 10%
+    total_comisiones = (total_ventas * 0.10)
+
+    contexto = {
+        'pedidos': pedidos[:20],
+        'total_ventas': total_ventas,
+        'total_comisiones': total_comisiones,
+    }
+    return render(request, 'dashboards/vendedor.html', contexto)

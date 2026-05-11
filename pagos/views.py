@@ -14,6 +14,7 @@ from django.utils import timezone
 from pedidos.models import Pedido
 from .models import Pago
 from .services import WebPayPlusSimulado, generar_boleta
+from pedidos.emails import enviar_boleta_compra
 
 
 @login_required
@@ -100,13 +101,17 @@ def retorno_webpay(request):
         pago.completado_en = timezone.now()
         pago.save()
 
-        # Actualizar estado del pedido
-        pedido.estado = 'aprobado'
-        pedido.aprobado_en = timezone.now()
-        pedido.save()
+        # Registrar pago exitoso sin cambiar el estado del pedido,
+        # para que el Ejecutivo lo apruebe manualmente.
+        # pedido.estado = 'aprobado' 
+        # pedido.aprobado_en = timezone.now()
+        # pedido.save()
 
         # Generar boleta electrónica
-        generar_boleta(pago)
+        boleta = generar_boleta(pago)
+        
+        # Enviar correo al usuario con la boleta
+        enviar_boleta_compra(pedido, pago, boleta)
 
         messages.success(request, '¡Pago procesado exitosamente!')
         return redirect('pagos:pago_exitoso', pedido_id=pedido.pk)

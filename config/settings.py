@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Apps de terceros
     'rest_framework',
+    'drf_spectacular',
+    
     # Apps del proyecto
     'core.apps.CoreConfig',
     'cuentas.apps.CuentasConfig',
@@ -40,7 +42,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.VendedorReferidoMiddleware',
 ]
+
+# Configuración de Seguridad de Sesiones
+SESSION_COOKIE_AGE = 1800  # La sesión expira tras 30 minutos (1800 segundos) de inactividad
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # La sesión se cierra al cerrar el navegador
+SESSION_COOKIE_SECURE = not DEBUG  # En producción (DEBUG=False) requiere HTTPS
+CSRF_COOKIE_SECURE = not DEBUG
 
 ROOT_URLCONF = 'config.urls'
 
@@ -98,8 +107,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API B2B MediStock',
+    'DESCRIPTION': 'Documentación oficial de la API de MediStock para integración automatizada con sistemas ERP de clínicas.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 # Configuración de correos con Gmail SMTP

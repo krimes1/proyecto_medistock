@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block titulo %}Dashboard Vendedor{% endblock %}
+{% block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">🤝 Dashboard — Vendedor de Insumos</h1>
+    <p class="page-header__subtitle">
+      Monitoreo de referidos, ventas y comisiones generadas.
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    
+    <!-- Link de afiliado -->
+    <div class="card" style="border: 2px dashed var(--primary-color); margin-bottom: 2rem; background: rgba(0,113,206,0.05);">
+        <h2 class="card__title" style="color: var(--primary-color);">Tu Link y Código de Vendedor</h2>
+        <p>Comparte este enlace con tus clientes. Al usarlo, obtendrán un 5% de descuento en sus pedidos y la venta se te asignará automáticamente.</p>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; align-items: center; flex-wrap: wrap;">
+            <div>
+                <strong>Código:</strong> <span class="badge badge--success" style="font-size:1.1rem; padding: 0.5rem 1rem;">{{ request.user.perfil.codigo_vendedor }}</span>
+            </div>
+            <div style="flex: 1;">
+                <strong>Link de Afiliado:</strong>
+                <input type="text" class="form-control" readonly value="{{ request.scheme }}://{{ request.get_host }}{% url 'core:inicio' %}?ref={{ request.user.perfil.codigo_vendedor }}" onclick="this.select();">
+            </div>
+        </div>
+    </div>
+
+    <!-- Métricas -->
+    <div class="metricas-grid">
+      <div class="metrica-card metrica--green">
+        <div class="metrica-card__numero">
+          ${{ total_ventas|floatformat:0 }}
+        </div>
+        <div class="metrica-card__label">Total Ventas (Tus Clientes)</div>
+      </div>
+      <div class="metrica-card">
+        <div class="metrica-card__numero">{{ pedidos.count }}</div>
+        <div class="metrica-card__label">Pedidos Generados</div>
+      </div>
+      <div class="metrica-card metrica--warning">
+        <div class="metrica-card__numero">
+          ${{ total_comisiones|floatformat:0 }}
+        </div>
+        <div class="metrica-card__label">Comisiones Estimadas (10%)</div>
+      </div>
+    </div>
+
+    <!-- Últimas Ventas -->
+    <h2 style="margin: 2rem 0 1rem">🛒 Tus Últimas Ventas</h2>
+    {% if pedidos %}
+    <div class="tabla-responsive">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Subtotal</th>
+            <th>Descuento Dado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pedido in pedidos %}
+          <tr>
+            <td>{{ pedido.numero_pedido }}</td>
+            <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+            <td>{{ pedido.creado_en|date:"d/m/Y H:i" }}</td>
+            <td><span class="badge badge--success">{{ pedido.get_estado_display }}</span></td>
+            <td><strong>${{ pedido.subtotal|floatformat:0 }}</strong></td>
+            <td style="color:red;">-${{ pedido.descuento|floatformat:0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted">Todavía no has generado ninguna venta.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

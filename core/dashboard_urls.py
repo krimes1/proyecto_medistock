@@ -20,4 +20,7 @@ urlpatterns = [
 
     # Administrador
     path('administrador/', views.dashboard_administrador, name='administrador'),
+
+    # Vendedor
+    path('vendedor/', views.dashboard_vendedor, name='vendedor'),
 ]

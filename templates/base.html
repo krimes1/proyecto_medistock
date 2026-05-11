@@ -35,28 +35,38 @@
                     <a href="{% url 'core:contacto' %}">Contacto</a>
                 </div>
                 <div class="navbar__actions">
-                    <a href="{% url 'carrito:detalle_carrito' %}" class="navbar__cart">
-                        🛒 Carrito
-                        {% if cantidad_items_carrito %}<span class="navbar__cart-badge">{{ cantidad_items_carrito }}</span>{% endif %}
-                    </a>
+                    {% if not user.is_authenticated or user.perfil.es_cliente %}
+                        <a href="{% url 'carrito:detalle_carrito' %}" class="navbar__cart">
+                            🛒 Carrito
+                            {% if cantidad_items_carrito %}<span class="navbar__cart-badge">{{ cantidad_items_carrito }}</span>{% endif %}
+                        </a>
+                    {% endif %}
+                    
                     {% if user.is_authenticated %}
                         <div class="user-menu" style="position:relative;display:inline-block; display:flex; align-items:center; gap:0.5rem;">
                             <a href="{% url 'cuentas:perfil' %}" class="btn btn--sm btn--outline" title="Mi Perfil">
                                 👤 {{ user.first_name|default:user.username }}
                             </a>
-                            <a href="{% url 'cuentas:mis_pedidos' %}" class="btn btn--sm btn--outline" style="border-color:transparent;" title="Mis Pedidos">
-                                📦 Mis Pedidos
-                            </a>
+                            
+                            {% if user.perfil.es_cliente %}
+                                <a href="{% url 'cuentas:mis_pedidos' %}" class="btn btn--sm btn--outline" style="border-color:transparent;" title="Mis Pedidos">
+                                    📦 Mis Pedidos
+                                </a>
+                            {% endif %}
                         </div>
+                        
                         {% if user.perfil.rol == 'administrador' %}
-                            <a href="{% url 'dashboards:administrador' %}" class="btn btn--sm btn--secondary">Panel</a>
+                            <a href="{% url 'dashboards:administrador' %}" class="btn btn--sm btn--secondary">⚙️ Panel Admin</a>
                         {% elif user.perfil.rol == 'ejecutivo' %}
-                            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--secondary">Panel</a>
+                            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--secondary">💼 Panel Ejecutivo</a>
                         {% elif user.perfil.rol == 'logistica' %}
-                            <a href="{% url 'dashboards:logistica' %}" class="btn btn--sm btn--secondary">Panel</a>
+                            <a href="{% url 'dashboards:logistica' %}" class="btn btn--sm btn--secondary">🚚 Panel Logística</a>
                         {% elif user.perfil.rol == 'analista' %}
-                            <a href="{% url 'dashboards:analista' %}" class="btn btn--sm btn--secondary">Panel</a>
+                            <a href="{% url 'dashboards:analista' %}" class="btn btn--sm btn--secondary">💰 Panel Finanzas</a>
+                        {% elif user.perfil.rol == 'vendedor' %}
+                            <a href="{% url 'dashboards:vendedor' %}" class="btn btn--sm btn--secondary">🤝 Panel de Ventas</a>
                         {% endif %}
+                        
                         <a href="{% url 'cuentas:logout' %}" class="btn btn--sm btn--danger" style="margin-left:0.5rem;background:var(--danger);color:white;border-color:var(--danger);">Cerrar Sesión</a>
                     {% else %}
                         <a href="{% url 'cuentas:login' %}" class="btn btn--sm btn--primary">Ingresar</a>

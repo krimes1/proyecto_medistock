@@ -4,7 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from decimal import Decimal
+from django.http import JsonResponse
 from .models import Pedido, ItemPedido
+from cuentas.models import PerfilUsuario
 from carrito.views import _obtener_carrito
 from inventario.models import Bodega
 
@@ -34,11 +36,24 @@ def checkout(request):
             messages.error(request, 'Completa todos los campos de envío.')
             return redirect('pedidos:checkout')
 
+        codigo_vendedor_input = request.POST.get('codigo_vendedor', '').strip()
+        vendedor_asignado = None
+        descuento = Decimal('0')
+
+        if codigo_vendedor_input:
+            from cuentas.models import PerfilUsuario
+            perfil_vendedor = PerfilUsuario.objects.filter(codigo_vendedor=codigo_vendedor_input, rol='vendedor').first()
+            if perfil_vendedor:
+                vendedor_asignado = perfil_vendedor.usuario
+                # Aplicar 5% de descuento
+                descuento = (carrito.total * Decimal('0.05')).quantize(Decimal('1'))
+
         # Calcular totales
         subtotal = carrito.total
+        subtotal_con_descuento = subtotal - descuento
         costo_envio = Decimal('5990') if tipo_despacho == 'express' else Decimal('2990')
-        impuesto = (subtotal * Decimal('0.19')).quantize(Decimal('1'))
-        total = subtotal + costo_envio + impuesto
+        impuesto = (subtotal_con_descuento * Decimal('0.19')).quantize(Decimal('1'))
+        total = subtotal_con_descuento + costo_envio + impuesto
 
         # Crear pedido
         pedido = Pedido.objects.create(
@@ -50,11 +65,17 @@ def checkout(request):
             region_envio=region,
             bodega_id=bodega_id if bodega_id else None,
             subtotal=subtotal,
+            descuento=descuento,
             costo_envio=costo_envio,
             impuesto=impuesto,
             total=total,
+            vendedor=vendedor_asignado,
             notas=notas,
         )
+
+        # Si usó un código, lo quitamos de la sesión para futuras compras
+        if vendedor_asignado and 'vendedor_ref' in request.session:
+            del request.session['vendedor_ref']
 
         # Crear items del pedido
         for item in items:
@@ -72,12 +93,14 @@ def checkout(request):
         return redirect('pagos:iniciar_pago', pedido_id=pedido.pk)
 
     from cuentas.forms import REGIONES_CHILE, CIUDADES_CHILE
+    codigo_sesion = request.session.get('vendedor_ref', '')
     contexto = {
         'carrito': carrito,
         'items': items,
         'bodegas': bodegas,
         'regiones': REGIONES_CHILE,
         'ciudades': CIUDADES_CHILE,
+        'codigo_vendedor_sesion': codigo_sesion,
     }
     return render(request, 'pedidos/checkout.html', contexto)
 
@@ -100,3 +123,20 @@ def confirmacion_pedido(request, pedido_id):
     """Página de confirmación tras pago exitoso."""
     pedido = get_object_or_404(Pedido, pk=pedido_id, usuario=request.user)
     return render(request, 'pedidos/confirmacion.html', {'pedido': pedido})
+
+
+@login_required
+def validar_codigo_vendedor(request):
+    """API para validar el código de vendedor por AJAX."""
+    codigo = request.GET.get('codigo', '').strip()
+    if not codigo:
+        return JsonResponse({'valido': False, 'mensaje': 'No se ingresó código'})
+
+    perfil = PerfilUsuario.objects.filter(codigo_vendedor=codigo, rol='vendedor').first()
+    if perfil:
+        return JsonResponse({
+            'valido': True,
+            'mensaje': '¡5% de descuento por vendedor aplicado exitosamente!',
+            'vendedor': perfil.usuario.get_full_name() or perfil.usuario.username
+        })
+    return JsonResponse({'valido': False, 'mensaje': 'Código de vendedor incorrecto o no existe'})
