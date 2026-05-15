@@ -1,5 +1,6 @@
-{% extends "base.html" %} {% block titulo %}{% if es_edicion %}Editar{% else
-%}Nueva{% endif %} Cotización{% endblock %} {% block contenido %}
+{% extends "base.html" %}
+{% block titulo %}{% if es_edicion %}Editar{% else %}Nueva{% endif %} Cotización{% endblock %}
+{% block contenido %}
 <section class="page-header page-header--dark">
   <div class="container">
     <h1 class="page-header__title">
@@ -63,10 +64,11 @@
         <div class="alert alert--danger" style="margin-bottom: 1rem">
           <strong>Corrige los errores:</strong>
           <ul style="margin-top: 0.5rem">
-            {% for field, errors in form.errors.items %} {% for error in errors
-            %}
-            <li>{{ error }}</li>
-            {% endfor %} {% endfor %}
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            {% endfor %}
           </ul>
         </div>
         {% endif %}
