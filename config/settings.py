@@ -128,3 +128,9 @@ EMAIL_HOST_USER = 'medistock.soporte@gmail.com'
 EMAIL_HOST_PASSWORD = 'elkmblejkejlpyta'
 DEFAULT_FROM_EMAIL = 'MediStock <medistock.soporte@gmail.com>'
 EMAIL_SUBJECT_PREFIX = '[MediStock] '
+
+# Configuración de Seguridad de Sesiones
+# Expira la sesión cuando el usuario cierra el navegador
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# Opcional: Tiempo de expiración de la sesión en segundos (ej. 30 minutos = 1800)
+SESSION_COOKIE_AGE = 1800
