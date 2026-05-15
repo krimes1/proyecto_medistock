@@ -1,5 +1,6 @@
 from django.urls import path
 from core import dashboard_views as views
+from core import vendedor_views as vend
 
 app_name = 'dashboards'
 
@@ -20,12 +21,8 @@ urlpatterns = [
 
     # Administrador
     path('administrador/', views.dashboard_administrador, name='administrador'),
-
-    # Reportes PDF — Descargar y Enviar por correo
     path('administrador/reporte/<str:tipo>/descargar/', views.descargar_reporte, name='descargar_reporte'),
     path('administrador/reporte/<str:tipo>/enviar/', views.enviar_reporte, name='enviar_reporte'),
-
-    # Alianzas Estratégicas CRUD
     path('administrador/alianzas/', views.lista_alianzas, name='lista_alianzas'),
     path('administrador/alianzas/crear/', views.crear_alianza, name='crear_alianza'),
     path('administrador/alianzas/<int:alianza_id>/editar/', views.editar_alianza, name='editar_alianza'),
@@ -33,4 +30,22 @@ urlpatterns = [
 
     # Vendedor
     path('vendedor/', views.dashboard_vendedor, name='vendedor'),
+
+    # Cotizaciones
+    path('vendedor/cotizaciones/', vend.lista_cotizaciones, name='lista_cotizaciones'),
+    path('vendedor/cotizaciones/crear/', vend.crear_cotizacion, name='crear_cotizacion'),
+    path('vendedor/cotizaciones/<int:cot_id>/', vend.detalle_cotizacion, name='detalle_cotizacion'),
+    path('vendedor/cotizaciones/<int:cot_id>/editar/', vend.editar_cotizacion, name='editar_cotizacion'),
+    path('vendedor/cotizaciones/<int:cot_id>/agregar-item/', vend.agregar_item_cotizacion, name='agregar_item_cotizacion'),
+    path('vendedor/cotizaciones/<int:cot_id>/eliminar-item/<int:item_id>/', vend.eliminar_item_cotizacion, name='eliminar_item_cotizacion'),
+    path('vendedor/cotizaciones/<int:cot_id>/estado/<str:nuevo_estado>/', vend.cambiar_estado_cotizacion, name='cambiar_estado_cotizacion'),
+    path('vendedor/cotizaciones/<int:cot_id>/pdf/', vend.descargar_cotizacion_pdf, name='descargar_cotizacion_pdf'),
+    path('vendedor/cotizaciones/<int:cot_id>/enviar/', vend.enviar_cotizacion_email, name='enviar_cotizacion_email'),
+    path('vendedor/cotizaciones/<int:cot_id>/convertir/', vend.convertir_cotizacion_pedido, name='convertir_cotizacion_pedido'),
+
+    # Asesoramiento
+    path('vendedor/asesoramiento/', vend.lista_visitas, name='lista_visitas'),
+    path('vendedor/asesoramiento/crear/', vend.crear_visita, name='crear_visita'),
+    path('vendedor/asesoramiento/<int:visita_id>/editar/', vend.editar_visita, name='editar_visita'),
+    path('vendedor/asesoramiento/<int:visita_id>/eliminar/', vend.eliminar_visita, name='eliminar_visita'),
 ]

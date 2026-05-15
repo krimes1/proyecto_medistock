@@ -438,3 +438,97 @@ def generar_reporte_vendedores():
     doc.build(elems, onFirstPage=_pie_pagina, onLaterPages=_pie_pagina)
     buf.seek(0)
     return buf
+
+
+# ════════════════════════════════════════
+# 7) PDF COTIZACIÓN (para el vendedor)
+# ════════════════════════════════════════
+def generar_pdf_cotizacion(cotizacion):
+    """Genera un PDF profesional de cotización para enviar al cliente."""
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=letter,
+                            topMargin=0.8*inch, bottomMargin=0.8*inch)
+    styles = _styles()
+    elems = []
+
+    _header(elems, styles, f'Cotización Nº {cotizacion.numero}',
+            f'Fecha: {cotizacion.creada_en.strftime("%d/%m/%Y")}')
+
+    # Datos del cliente
+    elems.append(Paragraph('Datos del Cliente', styles['SeccionTitulo']))
+    info = [
+        ['Cliente:', cotizacion.nombre_cliente],
+        ['Email:', cotizacion.email_cliente],
+    ]
+    if cotizacion.telefono_cliente:
+        info.append(['Teléfono:', cotizacion.telefono_cliente])
+    if cotizacion.direccion_cliente:
+        info.append(['Dirección:', cotizacion.direccion_cliente])
+    info.append(['Válida hasta:', cotizacion.valida_hasta.strftime('%d/%m/%Y')])
+
+    t_info = Table(info, colWidths=[1.5*inch, 4.5*inch])
+    t_info.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    elems.append(t_info)
+    elems.append(Spacer(1, 16))
+
+    # Tabla de productos
+    elems.append(Paragraph('Detalle de Productos', styles['SeccionTitulo']))
+    data = [['#', 'Producto', 'SKU', 'Cant.', 'P. Unitario', 'Subtotal']]
+    for i, item in enumerate(cotizacion.items.select_related('producto'), 1):
+        data.append([
+            str(i),
+            item.producto.nombre[:35],
+            item.producto.sku,
+            str(item.cantidad),
+            _formato_clp(item.precio_unitario),
+            _formato_clp(item.subtotal),
+        ])
+
+    if len(data) > 1:
+        t = Table(data, colWidths=[0.4*inch, 2.2*inch, 0.9*inch, 0.6*inch, 1*inch, 1*inch])
+        t.setStyle(_tabla_estilo())
+        elems.append(t)
+    elems.append(Spacer(1, 16))
+
+    # Totales
+    totales = [
+        ['Subtotal:', _formato_clp(cotizacion.subtotal)],
+        [f'Descuento ({cotizacion.descuento_porcentaje}%):', f'-{_formato_clp(cotizacion.descuento_monto)}'],
+        ['TOTAL:', _formato_clp(cotizacion.total)],
+    ]
+    t_tot = Table(totales, colWidths=[4*inch, 2*inch])
+    t_tot.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('FONTNAME', (-1, -1), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (-1, -1), (-1, -1), 13),
+        ('TEXTCOLOR', (-1, -1), (-1, -1), AZUL),
+        ('LINEABOVE', (0, -1), (-1, -1), 1.5, AZUL),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+    ]))
+    elems.append(t_tot)
+
+    # Notas
+    if cotizacion.notas:
+        elems.append(Spacer(1, 20))
+        elems.append(Paragraph('Notas / Condiciones', styles['SeccionTitulo']))
+        elems.append(Paragraph(cotizacion.notas, styles['Normal']))
+
+    # Pie con vendedor
+    elems.append(Spacer(1, 30))
+    vendedor_nombre = cotizacion.vendedor.get_full_name() or cotizacion.vendedor.username
+    elems.append(Paragraph(
+        f'Cotización generada por: <b>{vendedor_nombre}</b> — MediStock Ejecutivo de Cuentas',
+        styles['Pie']
+    ))
+
+    doc.build(elems, onFirstPage=_pie_pagina, onLaterPages=_pie_pagina)
+    buf.seek(0)
+    return buf

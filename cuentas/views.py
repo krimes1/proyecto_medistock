@@ -135,4 +135,6 @@ def _redireccion_por_rol(user):
             return 'dashboards:logistica'
         elif rol == 'analista':
             return 'dashboards:analista'
+        elif rol == 'vendedor':
+            return 'dashboards:vendedor'
     return 'core:inicio'
