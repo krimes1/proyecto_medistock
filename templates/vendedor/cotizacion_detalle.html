@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block titulo %}Cotización {{ cotizacion.numero }}{% endblock %}
+{% block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">📄 Cotización {{ cotizacion.numero }}</h1>
+    <p class="page-header__subtitle">
+      {{ cotizacion.nombre_cliente }} — {{ cotizacion.get_estado_display }}
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <!-- Barra de estado y acciones -->
+    <div class="card" style="margin-bottom: 1.5rem">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 1rem;
+        "
+      >
+        <div>
+          <span
+            class="badge {% if cotizacion.estado == 'borrador' %}badge--warning{% elif cotizacion.estado == 'enviada' %}badge--warning{% elif cotizacion.estado == 'aprobada' %}badge--success{% elif cotizacion.estado == 'convertida' %}badge--success{% else %}badge--danger{% endif %}"
+            style="font-size: 1rem; padding: 0.4rem 1rem"
+          >
+            {{ cotizacion.get_estado_display }}
+          </span>
+          <span class="text-muted" style="margin-left: 1rem"
+            >Válida hasta: {{ cotizacion.valida_hasta|date:"d/m/Y" }}</span
+          >
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+          {% if cotizacion.estado == 'borrador' or cotizacion.estado ==
+          'enviada' %}
+          <a
+            href="{% url 'dashboards:editar_cotizacion' cotizacion.pk %}"
+            class="btn btn--sm btn--outline"
+            >✏️ Editar</a
+          >
+          {% endif %}
+          <a
+            href="{% url 'dashboards:descargar_cotizacion_pdf' cotizacion.pk %}"
+            class="btn btn--sm btn--primary"
+            >⬇ PDF</a
+          >
+          <a
+            href="{% url 'dashboards:enviar_cotizacion_email' cotizacion.pk %}"
+            class="btn btn--sm btn--outline"
+            >📧 Enviar</a
+          >
+          {% if cotizacion.estado == 'borrador' %}
+          <a
+            href="{% url 'dashboards:cambiar_estado_cotizacion' cotizacion.pk 'enviada' %}"
+            class="btn btn--sm btn--secondary"
+            >📨 Marcar Enviada</a
+          >
+          {% elif cotizacion.estado == 'enviada' %}
+          <a
+            href="{% url 'dashboards:cambiar_estado_cotizacion' cotizacion.pk 'aprobada' %}"
+            class="btn btn--sm btn--secondary"
+            style="background: var(--success); border-color: var(--success)"
+            >✅ Aprobar</a
+          >
+          <a
+            href="{% url 'dashboards:cambiar_estado_cotizacion' cotizacion.pk 'rechazada' %}"
+            class="btn btn--sm btn--outline"
+            style="border-color: var(--danger); color: var(--danger)"
+            >❌ Rechazar</a
+          >
+          {% elif cotizacion.estado == 'aprobada' and not
+          cotizacion.pedido_generado %}
+          <a
+            href="{% url 'dashboards:convertir_cotizacion_pedido' cotizacion.pk %}"
+            class="btn btn--sm btn--secondary"
+            style="background: var(--success); border-color: var(--success)"
+            >🔄 Convertir a Pedido</a
+          >
+          {% endif %}
+        </div>
+      </div>
+      {% if cotizacion.pedido_generado %}
+      <div
+        style="
+          margin-top: 1rem;
+          padding: 0.8rem;
+          background: rgba(18, 184, 134, 0.1);
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--success);
+        "
+      >
+        ✅ <strong>Pedido generado:</strong> {{
+        cotizacion.pedido_generado.numero_pedido }}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="admin-grid">
+      <!-- Info del cliente -->
+      <div class="card">
+        <h2 class="card__title">👤 Datos del Cliente</h2>
+        <div class="alianza-card__body">
+          <div class="alianza-card__info">
+            <span>Nombre:</span>
+            <strong>{{ cotizacion.nombre_cliente }}</strong>
+          </div>
+          <div class="alianza-card__info">
+            <span>Email:</span> <strong>{{ cotizacion.email_cliente }}</strong>
+          </div>
+          {% if cotizacion.telefono_cliente %}
+          <div class="alianza-card__info">
+            <span>Teléfono:</span>
+            <strong>{{ cotizacion.telefono_cliente }}</strong>
+          </div>
+          {% endif %} {% if cotizacion.direccion_cliente %}
+          <div class="alianza-card__info">
+            <span>Dirección:</span>
+            <strong>{{ cotizacion.direccion_cliente }}</strong>
+          </div>
+          {% endif %}
+          <div class="alianza-card__info">
+            <span>Descuento:</span>
+            <strong>{{ cotizacion.descuento_porcentaje }}%</strong>
+          </div>
+        </div>
+        {% if cotizacion.notas %}
+        <div
+          style="
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: var(--gray-100);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+          "
+        >
+          <strong>Notas:</strong> {{ cotizacion.notas }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Agregar producto -->
+      {% if cotizacion.estado == 'borrador' or cotizacion.estado == 'enviada' %}
+      <div class="card">
+        <h2 class="card__title">➕ Agregar Producto</h2>
+        <form
+          method="post"
+          action="{% url 'dashboards:agregar_item_cotizacion' cotizacion.pk %}"
+        >
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Producto</label>
+            <select name="producto_id" class="form-control" required>
+              <option value="">— Seleccionar producto —</option>
+              {% for p in productos %}
+              <option value="{{ p.pk }}">
+                [{{ p.sku }}] {{ p.nombre }} — ${{ p.precio|floatformat:0 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cantidad</label>
+            <input
+              type="number"
+              name="cantidad"
+              value="1"
+              min="1"
+              class="form-control"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn--sm btn--primary"
+            style="width: 100%"
+          >
+            Agregar
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Tabla de items -->
+    <h2 style="margin: 2rem 0 1rem">📦 Productos Cotizados</h2>
+    {% if items %}
+    <div class="tabla-responsive">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Producto</th>
+            <th>SKU</th>
+            <th>Cantidad</th>
+            <th>P. Unitario</th>
+            <th>Subtotal</th>
+            {% if cotizacion.estado == 'borrador' or cotizacion.estado ==
+            'enviada' %}
+            <th>Acción</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.producto.nombre }}</td>
+            <td>{{ item.producto.sku }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>${{ item.precio_unitario|floatformat:0 }}</td>
+            <td><strong>${{ item.subtotal|floatformat:0 }}</strong></td>
+            {% if cotizacion.estado == 'borrador' or cotizacion.estado ==
+            'enviada' %}
+            <td>
+              <a
+                href="{% url 'dashboards:eliminar_item_cotizacion' cotizacion.pk item.pk %}"
+                class="btn btn--sm btn--outline"
+                style="border-color: var(--danger); color: var(--danger)"
+                >🗑</a
+              >
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totales -->
+    <div style="max-width: 350px; margin-left: auto; margin-top: 1rem">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem 0;
+          border-bottom: 1px solid var(--gray-300);
+        "
+      >
+        <span>Subtotal:</span
+        ><strong>${{ cotizacion.subtotal|floatformat:0 }}</strong>
+      </div>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem 0;
+          border-bottom: 1px solid var(--gray-300);
+          color: var(--danger);
+        "
+      >
+        <span>Descuento ({{ cotizacion.descuento_porcentaje }}%):</span
+        ><strong>-${{ cotizacion.descuento_monto|floatformat:0 }}</strong>
+      </div>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          padding: 0.8rem 0;
+          font-size: 1.2rem;
+          color: var(--primary);
+        "
+      >
+        <span><strong>TOTAL:</strong></span
+        ><strong>${{ cotizacion.total|floatformat:0 }}</strong>
+      </div>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 2rem">
+      <p class="text-muted">Aún no has agregado productos a esta cotización.</p>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem">
+      <a
+        href="{% url 'dashboards:lista_cotizaciones' %}"
+        class="btn btn--outline"
+        >← Volver a Cotizaciones</a
+      >
+    </div>
+  </div>
+</section>
+{% endblock %}

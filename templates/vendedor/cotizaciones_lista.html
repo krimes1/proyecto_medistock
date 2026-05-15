@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block titulo %}Cotizaciones{% endblock %}
+{% block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">📄 Gestión de Cotizaciones</h1>
+    <p class="page-header__subtitle">
+      Crea, envía y administra cotizaciones para clínicas e instituciones
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <!-- Métricas -->
+    <div
+      class="metricas-grid"
+      style="grid-template-columns: repeat(4, 1fr); margin-bottom: 2rem"
+    >
+      <div class="metrica-card">
+        <div class="metrica-card__numero">{{ total }}</div>
+        <div class="metrica-card__label">Total</div>
+      </div>
+      <div class="metrica-card metrica--warning">
+        <div class="metrica-card__numero">{{ borradores }}</div>
+        <div class="metrica-card__label">Borradores</div>
+      </div>
+      <div class="metrica-card metrica--blue">
+        <div class="metrica-card__numero">{{ enviadas }}</div>
+        <div class="metrica-card__label">Enviadas</div>
+      </div>
+      <div class="metrica-card metrica--green">
+        <div class="metrica-card__numero">{{ aprobadas }}</div>
+        <div class="metrica-card__label">Aprobadas</div>
+      </div>
+    </div>
+
+    <!-- Filtros y acciones -->
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      "
+    >
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+        <a
+          href="{% url 'dashboards:lista_cotizaciones' %}"
+          class="btn btn--sm {% if not estado_filtro %}btn--primary{% else %}btn--outline{% endif %}"
+          >Todas</a
+        >
+        <a
+          href="?estado=borrador"
+          class="btn btn--sm {% if estado_filtro == 'borrador' %}btn--primary{% else %}btn--outline{% endif %}"
+          >📝 Borradores</a
+        >
+        <a
+          href="?estado=enviada"
+          class="btn btn--sm {% if estado_filtro == 'enviada' %}btn--primary{% else %}btn--outline{% endif %}"
+          >📨 Enviadas</a
+        >
+        <a
+          href="?estado=aprobada"
+          class="btn btn--sm {% if estado_filtro == 'aprobada' %}btn--primary{% else %}btn--outline{% endif %}"
+          >✅ Aprobadas</a
+        >
+        <a
+          href="?estado=rechazada"
+          class="btn btn--sm {% if estado_filtro == 'rechazada' %}btn--primary{% else %}btn--outline{% endif %}"
+          >❌ Rechazadas</a
+        >
+        <a
+          href="?estado=convertida"
+          class="btn btn--sm {% if estado_filtro == 'convertida' %}btn--primary{% else %}btn--outline{% endif %}"
+          >🔄 Convertidas</a
+        >
+      </div>
+      <a
+        href="{% url 'dashboards:crear_cotizacion' %}"
+        class="btn btn--sm btn--secondary"
+        >➕ Nueva Cotización</a
+      >
+    </div>
+
+    {% if cotizaciones %}
+    <div class="tabla-responsive">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Nº Cotización</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th>Válida Hasta</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cot in cotizaciones %}
+          <tr>
+            <td><strong>{{ cot.numero }}</strong></td>
+            <td>{{ cot.nombre_cliente }}</td>
+            <td>
+              <span
+                class="badge {% if cot.estado == 'borrador' %}badge--warning {% elif cot.estado == 'enviada' %}badge--warning {% elif cot.estado == 'aprobada' %}badge--success {% elif cot.estado == 'convertida' %}badge--success {% else %}badge--danger{% endif %}"
+              >
+                {{ cot.get_estado_display }}
+              </span>
+            </td>
+            <td><strong>${{ cot.total|floatformat:0 }}</strong></td>
+            <td>{{ cot.valida_hasta|date:"d/m/Y" }}</td>
+            <td>{{ cot.creada_en|date:"d/m/Y" }}</td>
+            <td>
+              <a
+                href="{% url 'dashboards:detalle_cotizacion' cot.pk %}"
+                class="btn btn--sm btn--primary"
+                >Ver</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem">
+      <div style="font-size: 3rem">📄</div>
+      <h3>Sin cotizaciones</h3>
+      <p class="text-muted">Crea tu primera cotización para un cliente.</p>
+      <a
+        href="{% url 'dashboards:crear_cotizacion' %}"
+        class="btn btn--primary"
+        style="margin-top: 1rem"
+        >➕ Nueva Cotización</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

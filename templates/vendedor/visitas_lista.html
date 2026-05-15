@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block titulo %}Asesoramiento Clínico{% endblock %}
+{% block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">🩺 Asesoramiento Clínico</h1>
+    <p class="page-header__subtitle">
+      Registro de visitas técnicas, capacitaciones y seguimiento a instituciones
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container">
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      "
+    >
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+        <a
+          href="{% url 'dashboards:lista_visitas' %}"
+          class="btn btn--sm {% if not tipo_filtro %}btn--primary{% else %}btn--outline{% endif %}"
+          >Todas ({{ total }})</a
+        >
+        <a
+          href="?tipo=visita_tecnica"
+          class="btn btn--sm {% if tipo_filtro == 'visita_tecnica' %}btn--primary{% else %}btn--outline{% endif %}"
+          >🔧 Técnicas</a
+        >
+        <a
+          href="?tipo=capacitacion"
+          class="btn btn--sm {% if tipo_filtro == 'capacitacion' %}btn--primary{% else %}btn--outline{% endif %}"
+          >📚 Capacitaciones</a
+        >
+        <a
+          href="?tipo=demostracion"
+          class="btn btn--sm {% if tipo_filtro == 'demostracion' %}btn--primary{% else %}btn--outline{% endif %}"
+          >🎯 Demos</a
+        >
+        <a
+          href="?tipo=seguimiento"
+          class="btn btn--sm {% if tipo_filtro == 'seguimiento' %}btn--primary{% else %}btn--outline{% endif %}"
+          >📞 Seguimiento</a
+        >
+      </div>
+      <a
+        href="{% url 'dashboards:crear_visita' %}"
+        class="btn btn--sm btn--secondary"
+        >➕ Registrar Visita</a
+      >
+    </div>
+
+    {% if pendientes > 0 %}
+    <div class="alert alert--danger" style="margin-bottom: 1.5rem">
+      ⚠️ Tienes <strong>{{ pendientes }}</strong> visita{{
+      pendientes|pluralize:"s" }} pendiente{{ pendientes|pluralize:"s" }} de
+      seguimiento.
+    </div>
+    {% endif %} {% if visitas %}
+    <div class="alianzas-grid">
+      {% for v in visitas %}
+      <div class="alianza-card">
+        <div class="alianza-card__header">
+          <h3>{{ v.nombre_institucion }}</h3>
+          <span
+            class="badge {% if v.resultado == 'exitosa' %}badge--success{% elif v.resultado == 'pendiente' %}badge--warning{% else %}badge--danger{% endif %}"
+            style="font-size: 0.8rem; padding: 0.25rem 0.7rem"
+          >
+            {{ v.get_resultado_display }}
+          </span>
+        </div>
+        <div class="alianza-card__body">
+          <div class="alianza-card__info">
+            <span>Tipo:</span> <strong>{{ v.get_tipo_display }}</strong>
+          </div>
+          <div class="alianza-card__info">
+            <span>Contacto:</span> <strong>{{ v.contacto_nombre }}</strong>
+          </div>
+          {% if v.contacto_cargo %}
+          <div class="alianza-card__info">
+            <span>Cargo:</span> <strong>{{ v.contacto_cargo }}</strong>
+          </div>
+          {% endif %}
+          <div class="alianza-card__info">
+            <span>Fecha:</span>
+            <strong>{{ v.fecha_visita|date:"d/m/Y" }}</strong>
+          </div>
+          {% if v.fecha_seguimiento %}
+          <div class="alianza-card__info">
+            <span>Seguimiento:</span>
+            <strong>{{ v.fecha_seguimiento|date:"d/m/Y" }}</strong>
+          </div>
+          {% endif %}
+        </div>
+        {% if v.observaciones %}
+        <div
+          style="
+            padding: 0.5rem;
+            background: var(--gray-100);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+          "
+        >
+          {{ v.observaciones|truncatewords:25 }}
+        </div>
+        {% endif %}
+        <div class="alianza-card__actions">
+          <a
+            href="{% url 'dashboards:editar_visita' v.pk %}"
+            class="btn btn--sm btn--primary"
+            >✏️ Editar</a
+          >
+          <a
+            href="{% url 'dashboards:eliminar_visita' v.pk %}"
+            class="btn btn--sm btn--outline"
+            style="border-color: var(--danger); color: var(--danger)"
+            >🗑</a
+          >
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem">
+      <div style="font-size: 3rem">🩺</div>
+      <h3>Sin visitas registradas</h3>
+      <p class="text-muted">
+        Comienza registrando tu primera visita de asesoramiento.
+      </p>
+      <a
+        href="{% url 'dashboards:crear_visita' %}"
+        class="btn btn--primary"
+        style="margin-top: 1rem"
+        >➕ Registrar Visita</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

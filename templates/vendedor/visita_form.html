@@ -1,0 +1,105 @@
+{% extends "base.html" %} {% block titulo %}{% if es_edicion %}Editar{% else
+%}Nueva{% endif %} Visita{% endblock %} {% block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">
+      {% if es_edicion %}✏️ Editar Visita{% else %}➕ Registrar Visita{% endif
+      %}
+    </h1>
+    <p class="page-header__subtitle">
+      {% if es_edicion %}Actualiza los datos de la visita{% else %}Registra una
+      visita de asesoramiento a una institución{% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container" style="max-width: 700px">
+    <div class="card">
+      <form method="post">
+        {% csrf_token %}
+
+        <h3 style="margin-bottom: 1rem; color: var(--primary)">
+          🏥 Institución
+        </h3>
+        <div class="form-group">
+          <label>{{ form.nombre_institucion.label }}</label>
+          {{ form.nombre_institucion }}
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ form.contacto_nombre.label }}</label>
+            {{ form.contacto_nombre }}
+          </div>
+          <div class="form-group">
+            <label>{{ form.contacto_cargo.label }}</label>
+            {{ form.contacto_cargo }}
+          </div>
+        </div>
+
+        <h3 style="margin: 1.5rem 0 1rem; color: var(--primary)">
+          📋 Detalles de la Visita
+        </h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ form.tipo.label }}</label>
+            {{ form.tipo }}
+          </div>
+          <div class="form-group">
+            <label>{{ form.fecha_visita.label }}</label>
+            {{ form.fecha_visita }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ form.resultado.label }}</label>
+          {{ form.resultado }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.productos_presentados.label }}</label>
+          {{ form.productos_presentados }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.observaciones.label }}</label>
+          {{ form.observaciones }}
+        </div>
+
+        <h3 style="margin: 1.5rem 0 1rem; color: var(--primary)">
+          📅 Seguimiento
+        </h3>
+        <div class="form-group">
+          <label>{{ form.proxima_accion.label }}</label>
+          {{ form.proxima_accion }}
+        </div>
+        <div class="form-group">
+          <label>{{ form.fecha_seguimiento.label }}</label>
+          {{ form.fecha_seguimiento }}
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert--danger" style="margin-bottom: 1rem">
+          <strong>Corrige los errores:</strong>
+          <ul style="margin-top: 0.5rem">
+            {% for field, errors in form.errors.items %} {% for error in errors
+            %}
+            <li>{{ error }}</li>
+            {% endfor %} {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
+          <button type="submit" class="btn btn--primary">
+            {% if es_edicion %}Guardar Cambios{% else %}Registrar Visita{% endif
+            %}
+          </button>
+          <a
+            href="{% url 'dashboards:lista_visitas' %}"
+            class="btn btn--outline"
+            >Cancelar</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
