@@ -35,8 +35,7 @@
           >
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
-          {% if cotizacion.estado == 'borrador' or cotizacion.estado ==
-          'enviada' %}
+          {% if cotizacion.estado == 'borrador' or cotizacion.estado == 'enviada' %}
           <a
             href="{% url 'dashboards:editar_cotizacion' cotizacion.pk %}"
             class="btn btn--sm btn--outline"
@@ -72,8 +71,7 @@
             style="border-color: var(--danger); color: var(--danger)"
             >❌ Rechazar</a
           >
-          {% elif cotizacion.estado == 'aprobada' and not
-          cotizacion.pedido_generado %}
+          {% elif cotizacion.estado == 'aprobada' and not cotizacion.pedido_generado %}
           <a
             href="{% url 'dashboards:convertir_cotizacion_pedido' cotizacion.pk %}"
             class="btn btn--sm btn--secondary"
@@ -198,8 +196,7 @@
             <th>Cantidad</th>
             <th>P. Unitario</th>
             <th>Subtotal</th>
-            {% if cotizacion.estado == 'borrador' or cotizacion.estado ==
-            'enviada' %}
+            {% if cotizacion.estado == 'borrador' or cotizacion.estado == 'enviada' %}
             <th>Acción</th>
             {% endif %}
           </tr>
@@ -213,8 +210,7 @@
             <td>{{ item.cantidad }}</td>
             <td>${{ item.precio_unitario|floatformat:0 }}</td>
             <td><strong>${{ item.subtotal|floatformat:0 }}</strong></td>
-            {% if cotizacion.estado == 'borrador' or cotizacion.estado ==
-            'enviada' %}
+            {% if cotizacion.estado == 'borrador' or cotizacion.estado == 'enviada' %}
             <td>
               <a
                 href="{% url 'dashboards:eliminar_item_cotizacion' cotizacion.pk item.pk %}"
