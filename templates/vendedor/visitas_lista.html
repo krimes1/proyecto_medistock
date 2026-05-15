@@ -58,11 +58,11 @@
 
     {% if pendientes > 0 %}
     <div class="alert alert--danger" style="margin-bottom: 1.5rem">
-      ⚠️ Tienes <strong>{{ pendientes }}</strong> visita{{
-      pendientes|pluralize:"s" }} pendiente{{ pendientes|pluralize:"s" }} de
-      seguimiento.
+      ⚠️ Tienes <strong>{{ pendientes }}</strong> visita{{ pendientes|pluralize:"s" }} pendiente{{ pendientes|pluralize:"s" }} de seguimiento.
     </div>
-    {% endif %} {% if visitas %}
+    {% endif %}
+    
+    {% if visitas %}
     <div class="alianzas-grid">
       {% for v in visitas %}
       <div class="alianza-card">

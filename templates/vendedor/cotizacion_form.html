@@ -75,8 +75,7 @@
 
         <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
           <button type="submit" class="btn btn--primary">
-            {% if es_edicion %}Guardar Cambios{% else %}Crear y Agregar
-            Productos →{% endif %}
+            {% if es_edicion %}Guardar Cambios{% else %}Crear y Agregar Productos →{% endif %}
           </button>
           <a
             href="{% url 'dashboards:lista_cotizaciones' %}"
