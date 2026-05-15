@@ -5,8 +5,11 @@
 - Analista de Finanzas: confirmar pagos, auditar
 - Administrador: reportes de venta, alianzas
 """
+from datetime import timedelta
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.http import HttpResponse
+from django.core.mail import EmailMessage
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from cuentas.decorators import rol_requerido
@@ -187,11 +190,13 @@ def confirmar_transferencia(request, pago_id):
 
 
 # ============================================================
-# ADMINISTRADOR
+# ADMINISTRADOR — Centro de Reportes y Alianzas
 # ============================================================
 @rol_requerido('administrador')
 def dashboard_administrador(request):
-    """Dashboard Administrador: reportes de venta y métricas generales."""
+    """Dashboard Administrador: centro de reportes, métricas y alianzas."""
+    from core.models import AlianzaClinica
+
     # Métricas generales
     total_productos = Producto.objects.filter(activo=True).count()
     total_pedidos = Pedido.objects.count()
@@ -213,6 +218,12 @@ def dashboard_administrador(request):
         cantidad__lte=10, cantidad__gt=0
     ).select_related('producto', 'bodega')[:10]
 
+    # Alianzas resumen
+    alianzas = AlianzaClinica.objects.all()
+    alianzas_activas = alianzas.filter(estado='activa').count()
+    alianzas_negociacion = alianzas.filter(estado='en_negociacion').count()
+    total_alianzas = alianzas.count()
+
     contexto = {
         'total_productos': total_productos,
         'total_pedidos': total_pedidos,
@@ -221,8 +232,161 @@ def dashboard_administrador(request):
         'pedidos_por_estado': pedidos_por_estado,
         'ultimos_pedidos': ultimos_pedidos,
         'bajo_stock': bajo_stock,
+        'alianzas_activas': alianzas_activas,
+        'alianzas_negociacion': alianzas_negociacion,
+        'total_alianzas': total_alianzas,
     }
     return render(request, 'dashboards/administrador.html', contexto)
+
+
+# ------------ Descarga de Reportes PDF ----------------
+REPORTES_MAP = {
+    'ventas': ('Reporte de Ventas Generales', True),
+    'productos': ('Productos Más Vendidos', True),
+    'inventario': ('Stock Crítico', False),
+    'clientes': ('Clientes Principales', False),
+    'alianzas': ('Alianzas Estratégicas', False),
+    'vendedores': ('Rendimiento de Vendedores', False),
+}
+
+def _generar_pdf(tipo, fecha_desde=None, fecha_hasta=None):
+    from core.reportes import (
+        generar_reporte_ventas, generar_reporte_productos_vendidos,
+        generar_reporte_inventario, generar_reporte_clientes,
+        generar_reporte_alianzas, generar_reporte_vendedores,
+    )
+    generadores = {
+        'ventas': lambda: generar_reporte_ventas(fecha_desde, fecha_hasta),
+        'productos': lambda: generar_reporte_productos_vendidos(fecha_desde, fecha_hasta),
+        'inventario': generar_reporte_inventario,
+        'clientes': generar_reporte_clientes,
+        'alianzas': generar_reporte_alianzas,
+        'vendedores': generar_reporte_vendedores,
+    }
+    return generadores[tipo]()
+
+
+@rol_requerido('administrador')
+def descargar_reporte(request, tipo):
+    """Genera y descarga un reporte PDF."""
+    if tipo not in REPORTES_MAP:
+        messages.error(request, 'Tipo de reporte no válido.')
+        return redirect('dashboards:administrador')
+
+    titulo, usa_fechas = REPORTES_MAP[tipo]
+    fecha_desde = fecha_hasta = None
+    if usa_fechas:
+        from core.forms import ReporteFiltroForm
+        form = ReporteFiltroForm(request.GET)
+        if form.is_valid():
+            fecha_desde = form.cleaned_data.get('fecha_desde')
+            fecha_hasta = form.cleaned_data.get('fecha_hasta')
+
+    buf = _generar_pdf(tipo, fecha_desde, fecha_hasta)
+    fecha_str = timezone.now().strftime('%Y%m%d')
+    filename = f'medistock_{tipo}_{fecha_str}.pdf'
+    response = HttpResponse(buf.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+@rol_requerido('administrador')
+def enviar_reporte(request, tipo):
+    """Genera un reporte PDF y lo envía al correo del administrador."""
+    if tipo not in REPORTES_MAP:
+        messages.error(request, 'Tipo de reporte no válido.')
+        return redirect('dashboards:administrador')
+
+    titulo, usa_fechas = REPORTES_MAP[tipo]
+    fecha_desde = fecha_hasta = None
+    if usa_fechas:
+        from core.forms import ReporteFiltroForm
+        form = ReporteFiltroForm(request.GET)
+        if form.is_valid():
+            fecha_desde = form.cleaned_data.get('fecha_desde')
+            fecha_hasta = form.cleaned_data.get('fecha_hasta')
+
+    buf = _generar_pdf(tipo, fecha_desde, fecha_hasta)
+    fecha_str = timezone.now().strftime('%Y%m%d')
+    filename = f'medistock_{tipo}_{fecha_str}.pdf'
+
+    email = EmailMessage(
+        subject=f'[MediStock] {titulo}',
+        body=f'Estimado/a {request.user.get_full_name() or request.user.username},\n\n'
+             f'Adjunto encontrará el reporte "{titulo}" generado el {timezone.now().strftime("%d/%m/%Y %H:%M")}.\n\n'
+             f'Atentamente,\nSistema MediStock',
+        from_email='MediStock <medistock.soporte@gmail.com>',
+        to=[request.user.email],
+    )
+    email.attach(filename, buf.read(), 'application/pdf')
+    email.send(fail_silently=False)
+
+    messages.success(request, f'✅ El reporte "{titulo}" fue enviado a {request.user.email}.')
+    return redirect('dashboards:administrador')
+
+
+# ------------ CRUD Alianzas Estratégicas ----------------
+@rol_requerido('administrador')
+def lista_alianzas(request):
+    """Lista completa de alianzas estratégicas."""
+    from core.models import AlianzaClinica
+    alianzas = AlianzaClinica.objects.all()
+    estado_filtro = request.GET.get('estado', '')
+    if estado_filtro:
+        alianzas = alianzas.filter(estado=estado_filtro)
+    contexto = {
+        'alianzas': alianzas,
+        'estado_filtro': estado_filtro,
+    }
+    return render(request, 'dashboards/alianzas_lista.html', contexto)
+
+
+@rol_requerido('administrador')
+def crear_alianza(request):
+    """Crear nueva alianza estratégica."""
+    from core.forms import AlianzaClinicaForm
+    if request.method == 'POST':
+        form = AlianzaClinicaForm(request.POST)
+        if form.is_valid():
+            alianza = form.save(commit=False)
+            alianza.creada_por = request.user
+            alianza.save()
+            messages.success(request, f'Alianza con "{alianza.nombre_clinica}" creada exitosamente.')
+            return redirect('dashboards:lista_alianzas')
+    else:
+        form = AlianzaClinicaForm()
+    return render(request, 'dashboards/alianza_form.html', {'form': form, 'es_edicion': False})
+
+
+@rol_requerido('administrador')
+def editar_alianza(request, alianza_id):
+    """Editar alianza existente."""
+    from core.models import AlianzaClinica
+    from core.forms import AlianzaClinicaForm
+    alianza = get_object_or_404(AlianzaClinica, pk=alianza_id)
+    if request.method == 'POST':
+        form = AlianzaClinicaForm(request.POST, instance=alianza)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Alianza con "{alianza.nombre_clinica}" actualizada.')
+            return redirect('dashboards:lista_alianzas')
+    else:
+        form = AlianzaClinicaForm(instance=alianza)
+    return render(request, 'dashboards/alianza_form.html', {'form': form, 'alianza': alianza, 'es_edicion': True})
+
+
+@rol_requerido('administrador')
+def eliminar_alianza(request, alianza_id):
+    """Eliminar alianza estratégica."""
+    from core.models import AlianzaClinica
+    alianza = get_object_or_404(AlianzaClinica, pk=alianza_id)
+    if request.method == 'POST':
+        nombre = alianza.nombre_clinica
+        alianza.delete()
+        messages.success(request, f'Alianza con "{nombre}" eliminada.')
+        return redirect('dashboards:lista_alianzas')
+    return render(request, 'dashboards/alianza_confirm_delete.html', {'alianza': alianza})
+
 
 
 # ============================================================

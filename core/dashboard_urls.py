@@ -21,6 +21,16 @@ urlpatterns = [
     # Administrador
     path('administrador/', views.dashboard_administrador, name='administrador'),
 
+    # Reportes PDF — Descargar y Enviar por correo
+    path('administrador/reporte/<str:tipo>/descargar/', views.descargar_reporte, name='descargar_reporte'),
+    path('administrador/reporte/<str:tipo>/enviar/', views.enviar_reporte, name='enviar_reporte'),
+
+    # Alianzas Estratégicas CRUD
+    path('administrador/alianzas/', views.lista_alianzas, name='lista_alianzas'),
+    path('administrador/alianzas/crear/', views.crear_alianza, name='crear_alianza'),
+    path('administrador/alianzas/<int:alianza_id>/editar/', views.editar_alianza, name='editar_alianza'),
+    path('administrador/alianzas/<int:alianza_id>/eliminar/', views.eliminar_alianza, name='eliminar_alianza'),
+
     # Vendedor
     path('vendedor/', views.dashboard_vendedor, name='vendedor'),
 ]

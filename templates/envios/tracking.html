@@ -1,92 +1,197 @@
-{% extends "base.html" %}
-
-{% block titulo %}Seguimiento de Envío{% endblock %}
-
+{% extends "base.html" %} {% block titulo %}Seguimiento de Envío{% endblock %}
 {% block contenido %}
 <section class="page-header">
-    <div class="container">
-        <h1 class="page-header__title">📦 Seguimiento de Envío</h1>
-        <p class="page-header__subtitle">Consulta el estado de tu pedido en tiempo real</p>
-    </div>
+  <div class="container">
+    <h1 class="page-header__title">📦 Seguimiento de Envío</h1>
+    <p class="page-header__subtitle">
+      Consulta el estado de tu pedido en tiempo real
+    </p>
+  </div>
 </section>
 
 <section class="section section--white">
-    <div class="container" style="max-width:700px;">
-        <div class="card">
-            <form method="get" class="tracking-form">
-                <label for="numero" style="font-weight:600;margin-bottom:0.5rem;display:block;">Número de Seguimiento</label>
-                <div style="display:flex;gap:0.5rem;">
-                    <input type="text" name="numero" id="numero" value="{{ numero }}"
-                           class="form-control" placeholder="Ej: CHX1A2B3C4D5E">
-                    <button type="submit" class="btn btn--primary">Buscar</button>
-                </div>
-            </form>
+  <div class="container" style="max-width: 700px">
+    <div class="card">
+      <form method="get" class="tracking-form">
+        <label
+          for="numero"
+          style="font-weight: 600; margin-bottom: 0.5rem; display: block"
+          >Número de Seguimiento o Pedido</label
+        >
+        <div style="display: flex; gap: 0.5rem">
+          <input
+            type="text"
+            name="numero"
+            id="numero"
+            value="{{ numero }}"
+            class="form-control"
+            placeholder="Ej: CHX1A2B3C4D5E o MS-A1B2C3D4"
+          />
+          <button type="submit" class="btn btn--primary">Buscar</button>
         </div>
-
-        {% if numero %}
-            {% if envio %}
-            <div class="card" style="margin-top:1.5rem;">
-                <h2 class="card__title">Estado del Envío</h2>
-                <div class="tracking-info">
-                    <div class="tracking-info__row">
-                        <span>Nº Seguimiento</span>
-                        <strong>{{ envio.numero_seguimiento }}</strong>
-                    </div>
-                    <div class="tracking-info__row">
-                        <span>Transportista</span>
-                        <strong>{{ envio.get_transportista_display }}</strong>
-                    </div>
-                    <div class="tracking-info__row">
-                        <span>Estado</span>
-                        <span class="badge
-                            {% if envio.estado == 'entregado' %}badge--success
-                            {% elif envio.estado == 'en_transito' or envio.estado == 'en_reparto' %}badge--warning
-                            {% else %}badge--success{% endif %}"
-                            style="font-size:0.85rem;padding:0.3rem 0.8rem;">
-                            {{ envio.get_estado_display }}
-                        </span>
-                    </div>
-                    {% if envio.entrega_estimada %}
-                    <div class="tracking-info__row">
-                        <span>Entrega Estimada</span>
-                        <strong>{{ envio.entrega_estimada|date:"d/m/Y" }}</strong>
-                    </div>
-                    {% endif %}
-                    <div class="tracking-info__row">
-                        <span>Peso</span>
-                        <strong>{{ envio.peso_kg }} kg</strong>
-                    </div>
-                </div>
-            </div>
-
-            {% if eventos %}
-            <div class="card" style="margin-top:1.5rem;">
-                <h2 class="card__title">Historial de Tracking</h2>
-                <div class="tracking-timeline">
-                    {% for evento in eventos %}
-                    <div class="tracking-evento {% if forloop.first %}tracking-evento--actual{% endif %}">
-                        <div class="tracking-evento__punto"></div>
-                        <div class="tracking-evento__contenido">
-                            <h4>{{ evento.estado }}</h4>
-                            <p>{{ evento.descripcion }}</p>
-                            <div class="tracking-evento__meta">
-                                📍 {{ evento.ubicacion }} · {{ evento.fecha_hora|date:"d/m/Y H:i" }}
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            {% else %}
-            <div class="card" style="margin-top:1.5rem;text-align:center;">
-                <div style="font-size:3rem;">🔍</div>
-                <h3>Envío no encontrado</h3>
-                <p class="text-muted">No se encontró un envío con el número <strong>{{ numero }}</strong>. Verifica el número e intenta nuevamente.</p>
-            </div>
-            {% endif %}
-        {% endif %}
+        <small class="text-muted" style="display: block; margin-top: 0.5rem"
+          >Puedes buscar por número de seguimiento (CHX...) o por número de
+          pedido (MS-...)</small
+        >
+      </form>
     </div>
+
+    {% if numero %} {% if envio %} {# — Envío encontrado: mostrar toda la info
+    de tracking — #}
+    <div class="card" style="margin-top: 1.5rem">
+      <h2 class="card__title">Estado del Envío</h2>
+      <div class="tracking-info">
+        <div class="tracking-info__row">
+          <span>Nº Pedido</span>
+          <strong>{{ envio.pedido.numero_pedido }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Nº Seguimiento</span>
+          <strong>{{ envio.numero_seguimiento }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Transportista</span>
+          <strong>{{ envio.get_transportista_display }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Estado</span>
+          <span
+            class="badge {% if envio.estado == 'entregado' %}badge--success {% elif envio.estado == 'en_transito' or envio.estado == 'en_reparto' %}badge--warning {% else %}badge--success{% endif %}"
+            style="font-size: 0.85rem; padding: 0.3rem 0.8rem"
+          >
+            {{ envio.get_estado_display }}
+          </span>
+        </div>
+        {% if envio.entrega_estimada %}
+        <div class="tracking-info__row">
+          <span>Entrega Estimada</span>
+          <strong>{{ envio.entrega_estimada|date:"d/m/Y" }}</strong>
+        </div>
+        {% endif %}
+        <div class="tracking-info__row">
+          <span>Peso</span>
+          <strong>{{ envio.peso_kg }} kg</strong>
+        </div>
+      </div>
+    </div>
+
+    {% if eventos %}
+    <div class="card" style="margin-top: 1.5rem">
+      <h2 class="card__title">Historial de Tracking</h2>
+      <div class="tracking-timeline">
+        {% for evento in eventos %}
+        <div
+          class="tracking-evento {% if forloop.first %}tracking-evento--actual{% endif %}"
+        >
+          <div class="tracking-evento__punto"></div>
+          <div class="tracking-evento__contenido">
+            <h4>{{ evento.estado }}</h4>
+            <p>{{ evento.descripcion }}</p>
+            <div class="tracking-evento__meta">
+              📍 {{ evento.ubicacion }} · {{ evento.fecha_hora|date:"d/m/Y H:i"
+              }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %} {% elif pedido %} {# — Pedido encontrado pero aún sin envío
+    despachado — #}
+    <div class="card" style="margin-top: 1.5rem">
+      <h2 class="card__title">Estado del Pedido</h2>
+      <div class="tracking-info">
+        <div class="tracking-info__row">
+          <span>Nº Pedido</span>
+          <strong>{{ pedido.numero_pedido }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Estado</span>
+          <span
+            class="badge {% if pedido.estado == 'entregado' %}badge--success {% elif pedido.estado == 'cancelado' %}badge--danger {% elif pedido.estado == 'despachado' %}badge--warning {% else %}badge--warning{% endif %}"
+            style="font-size: 0.85rem; padding: 0.3rem 0.8rem"
+          >
+            {{ pedido.get_estado_display }}
+          </span>
+        </div>
+        <div class="tracking-info__row">
+          <span>Tipo de Despacho</span>
+          <strong>{{ pedido.get_tipo_despacho_display }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Prioridad</span>
+          <strong>{{ pedido.get_prioridad_display }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Destino</span>
+          <strong>{{ pedido.ciudad_envio }}, {{ pedido.region_envio }}</strong>
+        </div>
+        <div class="tracking-info__row">
+          <span>Fecha de Compra</span>
+          <strong>{{ pedido.creado_en|date:"d/m/Y H:i" }}</strong>
+        </div>
+      </div>
+    </div>
+
+    {# — Línea de tiempo del estado del pedido — #}
+    <div class="card" style="margin-top: 1.5rem">
+      <h2 class="card__title">Progreso del Pedido</h2>
+      <div class="tracking-timeline">
+        <div class="tracking-evento tracking-evento--actual">
+          <div class="tracking-evento__punto"></div>
+          <div class="tracking-evento__contenido">
+            <h4>Pedido Recibido</h4>
+            <p>Tu pedido ha sido registrado exitosamente.</p>
+            <div class="tracking-evento__meta">
+              📍 MediStock · {{ pedido.creado_en|date:"d/m/Y H:i" }}
+            </div>
+          </div>
+        </div>
+        {% if pedido.estado != 'pendiente' %}
+        <div
+          class="tracking-evento {% if pedido.estado == 'aprobado' %}tracking-evento--actual{% endif %}"
+        >
+          <div class="tracking-evento__punto"></div>
+          <div class="tracking-evento__contenido">
+            <h4>Aprobado por Ejecutivo</h4>
+            <p>Un ejecutivo ha aprobado tu pedido para preparación.</p>
+            {% if pedido.aprobado_en %}
+            <div class="tracking-evento__meta">
+              📍 MediStock · {{ pedido.aprobado_en|date:"d/m/Y H:i" }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %} {% if pedido.estado == 'preparando' %}
+        <div class="tracking-evento tracking-evento--actual">
+          <div class="tracking-evento__punto"></div>
+          <div class="tracking-evento__contenido">
+            <h4>En Preparación</h4>
+            <p>Tu pedido está siendo preparado en bodega para despacho.</p>
+          </div>
+        </div>
+        {% endif %} {% if pedido.estado == 'pendiente' %}
+        <div class="tracking-evento" style="opacity: 0.4">
+          <div class="tracking-evento__punto"></div>
+          <div class="tracking-evento__contenido">
+            <h4>Pendiente de Aprobación</h4>
+            <p>Tu pedido está en espera de revisión por un ejecutivo.</p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% else %}
+    <div class="card" style="margin-top: 1.5rem; text-align: center">
+      <div style="font-size: 3rem">🔍</div>
+      <h3>Envío no encontrado</h3>
+      <p class="text-muted">
+        No se encontró un envío o pedido con el número
+        <strong>{{ numero }}</strong>. Verifica el número e intenta nuevamente.
+      </p>
+    </div>
+    {% endif %} {% endif %}
+  </div>
 </section>
 {% endblock %}

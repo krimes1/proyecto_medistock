@@ -352,6 +352,21 @@ ul { list-style: none; }
   opacity: 0.9;
 }
 
+.hero__visual-img {
+  width: 100%;
+  max-width: 480px;
+  animation: float 6s ease-in-out infinite;
+  filter: drop-shadow(0 20px 40px rgba(10,110,189,0.3));
+}
+
+.hero__visual-img img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 3px solid rgba(255,255,255,0.15);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-20px); }
@@ -1064,3 +1079,78 @@ code { background: var(--gray-100); padding: 0.15rem 0.4rem; border-radius: 4px;
 /* ===== PEDIDO LAYOUT ===== */
 .pedido-layout { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; }
 .pedido-estado { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+
+/* ===== CENTRO DE REPORTES ===== */
+.reportes-centro__header { margin-bottom: 1.5rem; }
+.reportes-centro__header h2 { font-size: 1.5rem; font-weight: 800; color: var(--dark); margin-bottom: 0.3rem; }
+
+.reportes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.reporte-card {
+  background: var(--white);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+.reporte-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+.reporte-card__icon {
+  width: 48px; height: 48px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 1rem;
+}
+.reporte-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--dark); }
+.reporte-card p { font-size: 0.85rem; color: var(--gray-500); line-height: 1.5; flex: 1; }
+.reporte-card__actions {
+  display: flex; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem;
+  border-top: 1px solid var(--gray-300);
+}
+
+/* ===== ALIANZAS ===== */
+.alianzas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.alianza-card {
+  background: var(--white);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  border-left: 4px solid var(--primary);
+}
+.alianza-card:hover { box-shadow: var(--shadow-md); }
+.alianza-card__header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.alianza-card__header h3 { font-size: 1.05rem; font-weight: 700; color: var(--dark); }
+.alianza-card__body { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
+.alianza-card__info {
+  display: flex; justify-content: space-between; font-size: 0.85rem;
+  padding: 0.25rem 0; border-bottom: 1px solid var(--gray-100);
+}
+.alianza-card__info span:first-child { color: var(--gray-500); }
+.alianza-card__actions {
+  display: flex; gap: 0.5rem; padding-top: 0.8rem;
+  border-top: 1px solid var(--gray-300);
+}
+
+@media (max-width: 768px) {
+  .reportes-grid { grid-template-columns: 1fr; }
+  .alianzas-grid { grid-template-columns: 1fr; }
+}

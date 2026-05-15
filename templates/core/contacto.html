@@ -63,29 +63,30 @@
             <div>
                 <div class="card">
                     <h2 class="card__title">Envíanos un Mensaje</h2>
-                    <form class="auth-form">
+                    <form method="POST" action="{% url 'core:contacto' %}" class="auth-form">
+                        {% csrf_token %}
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Nombre</label>
-                                <input type="text" class="form-control" placeholder="Tu nombre">
+                                <input type="text" name="nombre" class="form-control" placeholder="Tu nombre" required>
                             </div>
                             <div class="form-group">
                                 <label>Email</label>
-                                <input type="email" class="form-control" placeholder="tu@email.com">
+                                <input type="email" name="email" class="form-control" placeholder="tu@email.com" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Asunto</label>
-                            <select class="form-control">
-                                <option>Consulta general</option>
-                                <option>Cotización B2B</option>
-                                <option>Soporte técnico</option>
-                                <option>Alianzas estratégicas</option>
+                            <select name="asunto" class="form-control" required>
+                                <option value="Consulta general">Consulta general</option>
+                                <option value="Cotización B2B">Cotización B2B</option>
+                                <option value="Soporte técnico">Soporte técnico</option>
+                                <option value="Alianzas estratégicas">Alianzas estratégicas</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Mensaje</label>
-                            <textarea class="form-control" rows="5" placeholder="¿En qué podemos ayudarte?"></textarea>
+                            <textarea name="mensaje" class="form-control" rows="5" placeholder="¿En qué podemos ayudarte?" required></textarea>
                         </div>
                         <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">Enviar Mensaje</button>
                     </form>

@@ -1,5 +1,6 @@
 """Formularios de autenticación y perfil."""
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from .models import PerfilUsuario
@@ -24,6 +25,16 @@ class FormularioRegistro(forms.ModelForm):
     password2 = forms.CharField(
         label='Confirmar Contraseña',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repetir contraseña'})
+    )
+    first_name = forms.CharField(
+        label='Nombre',
+        validators=[RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', 'El nombre no puede contener caracteres especiales o números.')],
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre'})
+    )
+    last_name = forms.CharField(
+        label='Apellido',
+        validators=[RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', 'El apellido no puede contener caracteres especiales o números.')],
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellido'})
     )
     class Meta:
         model = User
@@ -73,35 +84,71 @@ REGIONES_CHILE = [
 
 CIUDADES_CHILE = [
     ('', 'Seleccione una ciudad...'),
-    ('Arica', 'Arica'),
-    ('Iquique', 'Iquique'),
+    ('Angol', 'Angol'),
     ('Antofagasta', 'Antofagasta'),
-    ('Copiapó', 'Copiapó'),
-    ('La Serena', 'La Serena'),
-    ('Coquimbo', 'Coquimbo'),
-    ('Valparaíso', 'Valparaíso'),
-    ('Viña del Mar', 'Viña del Mar'),
-    ('Santiago', 'Santiago'),
-    ('Providencia', 'Providencia'),
-    ('Maipú', 'Maipú'),
-    ('Puente Alto', 'Puente Alto'),
-    ('Rancagua', 'Rancagua'),
-    ('Talca', 'Talca'),
+    ('Arica', 'Arica'),
+    ('Calama', 'Calama'),
+    ('Castro', 'Castro'),
+    ('Chiguayante', 'Chiguayante'),
     ('Chillán', 'Chillán'),
     ('Concepción', 'Concepción'),
-    ('Temuco', 'Temuco'),
-    ('Valdivia', 'Valdivia'),
+    ('Copiapó', 'Copiapó'),
+    ('Coronel', 'Coronel'),
+    ('Coyhaique', 'Coyhaique'),
+    ('Coquimbo', 'Coquimbo'),
+    ('Curicó', 'Curicó'),
+    ('Iquique', 'Iquique'),
+    ('La Florida', 'La Florida'),
+    ('La Serena', 'La Serena'),
+    ('La Unión', 'La Unión'),
+    ('Las Condes', 'Las Condes'),
+    ('Linares', 'Linares'),
+    ('Los Andes', 'Los Andes'),
+    ('Los Ángeles', 'Los Ángeles'),
+    ('Maipú', 'Maipú'),
+    ('Osorno', 'Osorno'),
+    ('Ovalle', 'Ovalle'),
+    ('Padre Las Casas', 'Padre Las Casas'),
+    ('Peñalolén', 'Peñalolén'),
+    ('Providencia', 'Providencia'),
+    ('Puente Alto', 'Puente Alto'),
+    ('Puerto Aysén', 'Puerto Aysén'),
     ('Puerto Montt', 'Puerto Montt'),
+    ('Puerto Natales', 'Puerto Natales'),
+    ('Puerto Varas', 'Puerto Varas'),
     ('Punta Arenas', 'Punta Arenas'),
+    ('Quillota', 'Quillota'),
+    ('Quilpué', 'Quilpué'),
+    ('Rancagua', 'Rancagua'),
+    ('San Antonio', 'San Antonio'),
+    ('San Bernardo', 'San Bernardo'),
+    ('San Carlos', 'San Carlos'),
+    ('San Felipe', 'San Felipe'),
+    ('San Fernando', 'San Fernando'),
+    ('San Pedro de la Paz', 'San Pedro de la Paz'),
+    ('Santiago', 'Santiago'),
+    ('Talca', 'Talca'),
+    ('Talcahuano', 'Talcahuano'),
+    ('Temuco', 'Temuco'),
+    ('Tocopilla', 'Tocopilla'),
+    ('Valdivia', 'Valdivia'),
+    ('Vallenar', 'Vallenar'),
+    ('Valparaíso', 'Valparaíso'),
+    ('Villa Alemana', 'Villa Alemana'),
+    ('Villarrica', 'Villarrica'),
+    ('Viña del Mar', 'Viña del Mar'),
+    ('Ñuñoa', 'Ñuñoa'),
 ]
 
 class FormularioPerfil(forms.ModelForm):
     first_name = forms.CharField(
         label='Nombre',
+        validators=[RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', 'El nombre no puede contener caracteres especiales o números.')],
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     last_name = forms.CharField(
         label='Apellido',
+        validators=[RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', 'El apellido no puede contener caracteres especiales o números.')],
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     email = forms.EmailField(

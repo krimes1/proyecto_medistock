@@ -10,6 +10,7 @@
     {% block css_extra %}{% endblock %}
 </head>
 <body>
+    {% if not user.is_authenticated or not user.perfil.es_interno %}
     <div class="navbar__top">
         <div class="container">
             <span>📍 Antonio Varas 666, 7500961 Providencia, Región Metropolitana — Lun-Vie 8:00 a 18:00</span>
@@ -19,14 +20,29 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <nav class="navbar">
         <div class="navbar__main">
             <div class="container">
+                {% if user.is_authenticated and user.perfil.rol == 'administrador' %}
+                <a href="{% url 'dashboards:administrador' %}" class="navbar__logo">
+                {% elif user.is_authenticated and user.perfil.rol == 'ejecutivo' %}
+                <a href="{% url 'dashboards:ejecutivo' %}" class="navbar__logo">
+                {% elif user.is_authenticated and user.perfil.rol == 'logistica' %}
+                <a href="{% url 'dashboards:logistica' %}" class="navbar__logo">
+                {% elif user.is_authenticated and user.perfil.rol == 'analista' %}
+                <a href="{% url 'dashboards:analista' %}" class="navbar__logo">
+                {% elif user.is_authenticated and user.perfil.rol == 'vendedor' %}
+                <a href="{% url 'dashboards:vendedor' %}" class="navbar__logo">
+                {% else %}
                 <a href="{% url 'core:inicio' %}" class="navbar__logo">
+                {% endif %}
                     <svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#0A6EBD"/><path d="M20 8v24M8 20h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>
                     Medi<span>Stock</span>
                 </a>
+                
+                {% if not user.is_authenticated or not user.perfil.es_interno %}
                 <div class="navbar__links" id="navLinks">
                     <a href="{% url 'core:inicio' %}">Inicio</a>
                     <a href="{% url 'productos:lista_productos' %}">Catálogo</a>
@@ -34,6 +50,8 @@
                     <a href="{% url 'core:nosotros' %}">Nosotros</a>
                     <a href="{% url 'core:contacto' %}">Contacto</a>
                 </div>
+                {% endif %}
+                
                 <div class="navbar__actions">
                     {% if not user.is_authenticated or user.perfil.es_cliente %}
                         <a href="{% url 'carrito:detalle_carrito' %}" class="navbar__cart">
@@ -90,6 +108,7 @@
     <main>{% block contenido %}{% endblock %}</main>
 
     <footer class="footer">
+        {% if not user.is_authenticated or not user.perfil.es_interno %}
         <div class="container">
             <div class="footer__grid">
                 <div>
@@ -108,10 +127,10 @@
                 <div>
                     <h4 class="footer__heading">Categorías</h4>
                     <ul class="footer__links">
-                        <li><a href="#">Descartables</a></li>
-                        <li><a href="#">Quirúrgicos</a></li>
-                        <li><a href="#">Equipamiento</a></li>
-                        <li><a href="#">Laboratorio</a></li>
+                        <li><a href="{% url 'productos:detalle_categoria' 'descartables' %}">Descartables</a></li>
+                        <li><a href="{% url 'productos:detalle_categoria' 'quirurgicos' %}">Quirúrgicos</a></li>
+                        <li><a href="{% url 'productos:detalle_categoria' 'equipamiento' %}">Equipamiento</a></li>
+                        <li><a href="{% url 'productos:detalle_categoria' 'laboratorio' %}">Laboratorio</a></li>
                     </ul>
                 </div>
                 <div>
@@ -122,6 +141,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         <div class="footer__bottom">
             <div class="container">© 2026 MediStock. Todos los derechos reservados.</div>
         </div>
@@ -134,6 +154,68 @@
                 setTimeout(() => msg.remove(), 300);
             });
         }, 5000);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Validación de caracteres especiales en nombre y apellido
+            const textFields = document.querySelectorAll('input[name="first_name"], input[name="last_name"]');
+            textFields.forEach(field => {
+                field.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                });
+            });
+
+            // Selector dinámico de Región y Ciudad
+            const regionSelect = document.querySelector('select[name="region"]');
+            const ciudadSelect = document.querySelector('select[name="ciudad"]');
+            
+            if (regionSelect && ciudadSelect) {
+                const citiesByRegion = {
+                    'Arica y Parinacota': ['Arica'],
+                    'Tarapacá': ['Iquique'],
+                    'Antofagasta': ['Antofagasta', 'Calama', 'Tocopilla'],
+                    'Atacama': ['Copiapó', 'Vallenar'],
+                    'Coquimbo': ['La Serena', 'Coquimbo', 'Ovalle'],
+                    'Valparaíso': ['Valparaíso', 'Viña del Mar', 'Quilpué', 'Villa Alemana', 'San Antonio', 'Quillota', 'Los Andes', 'San Felipe'],
+                    'Metropolitana de Santiago': ['Santiago', 'Providencia', 'Maipú', 'Puente Alto', 'La Florida', 'Las Condes', 'Ñuñoa', 'Peñalolén', 'San Bernardo'],
+                    'O\'Higgins': ['Rancagua', 'San Fernando'],
+                    'Maule': ['Talca', 'Curicó', 'Linares'],
+                    'Ñuble': ['Chillán', 'San Carlos'],
+                    'Biobío': ['Concepción', 'Talcahuano', 'Los Ángeles', 'San Pedro de la Paz', 'Chiguayante', 'Coronel'],
+                    'La Araucanía': ['Temuco', 'Padre Las Casas', 'Villarrica', 'Angol'],
+                    'Los Ríos': ['Valdivia', 'La Unión'],
+                    'Los Lagos': ['Puerto Montt', 'Osorno', 'Castro', 'Puerto Varas'],
+                    'Aysén': ['Coyhaique', 'Puerto Aysén'],
+                    'Magallanes': ['Punta Arenas', 'Puerto Natales']
+                };
+
+                function updateCities() {
+                    const selectedRegion = regionSelect.value;
+                    const currentCity = ciudadSelect.value;
+                    
+                    ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad...</option>';
+                    
+                    if (selectedRegion && citiesByRegion[selectedRegion]) {
+                        ciudadSelect.disabled = false;
+                        citiesByRegion[selectedRegion].forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city;
+                            option.textContent = city;
+                            if (city === currentCity) option.selected = true;
+                            ciudadSelect.appendChild(option);
+                        });
+                    } else {
+                        ciudadSelect.disabled = true;
+                    }
+                }
+
+                updateCities();
+
+                regionSelect.addEventListener('change', function() {
+                    ciudadSelect.value = '';
+                    updateCities();
+                });
+            }
+        });
     </script>
     {% block js_extra %}{% endblock %}
 </body>

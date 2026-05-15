@@ -5,23 +5,41 @@ from .models import Envio, EventoSeguimiento
 
 
 def tracking_publico(request):
-    """Vista pública para consultar estado de un envío por número de seguimiento."""
+    """Vista pública para consultar estado de un envío por número de seguimiento o número de pedido."""
     numero = request.GET.get('numero', '').strip()
     envio = None
+    pedido = None
     eventos = []
 
     if numero:
+        # Primero buscar por número de seguimiento en Envio
         try:
             envio = Envio.objects.select_related('pedido__usuario').get(
                 numero_seguimiento__iexact=numero
             )
+            pedido = envio.pedido
             eventos = envio.eventos.all().order_by('-fecha_hora')
         except Envio.DoesNotExist:
             envio = None
 
+        # Si no se encontró envío, buscar por número de pedido
+        if not envio:
+            from pedidos.models import Pedido
+            try:
+                pedido = Pedido.objects.get(numero_pedido__iexact=numero)
+                # Intentar obtener el envío asociado al pedido
+                try:
+                    envio = pedido.envio
+                    eventos = envio.eventos.all().order_by('-fecha_hora')
+                except Envio.DoesNotExist:
+                    envio = None
+            except Pedido.DoesNotExist:
+                pedido = None
+
     contexto = {
         'numero': numero,
         'envio': envio,
+        'pedido': pedido,
         'eventos': eventos,
     }
     return render(request, 'envios/tracking.html', contexto)
