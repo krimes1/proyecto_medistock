@@ -184,7 +184,10 @@ def descargar_reporte_stock(request):
     fecha_str = timezone.now().strftime('%Y%m%d')
     filename = f'medistock_stock_{fecha_str}.pdf'
     response = HttpResponse(buf.read(), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    if request.GET.get('preview') == 'true':
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+    else:
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 
@@ -464,7 +467,10 @@ def descargar_reporte(request, tipo):
     fecha_str = timezone.now().strftime('%Y%m%d')
     filename = f'medistock_{tipo}_{fecha_str}.pdf'
     response = HttpResponse(buf.read(), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    if request.GET.get('preview') == 'true':
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+    else:
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
 
 

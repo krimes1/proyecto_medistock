@@ -60,6 +60,7 @@
                     <h3>Ventas Generales</h3>
                     <p>Ingresos, pedidos por estado y resumen ejecutivo del período.</p>
                     <div class="reporte-card__actions">
+                        <a href="#" onclick="previsualizarReporte('ventas')" class="btn btn--sm btn--outline" title="Vista Previa">👁 Ver</a>
                         <a href="#" onclick="descargarReporte('ventas')" class="btn btn--sm btn--primary">⬇ Descargar</a>
                         <a href="#" onclick="enviarReporte('ventas')" class="btn btn--sm btn--outline"> Enviar</a>
                     </div>
@@ -69,6 +70,7 @@
                     <h3>Productos Más Vendidos</h3>
                     <p>Ranking de los 20 productos con más unidades vendidas.</p>
                     <div class="reporte-card__actions">
+                        <a href="#" onclick="previsualizarReporte('productos')" class="btn btn--sm btn--outline" title="Vista Previa">👁 Ver</a>
                         <a href="#" onclick="descargarReporte('productos')" class="btn btn--sm btn--primary">⬇ Descargar</a>
                         <a href="#" onclick="enviarReporte('productos')" class="btn btn--sm btn--outline"> Enviar</a>
                     </div>
@@ -78,6 +80,7 @@
                     <h3>Stock Crítico</h3>
                     <p>Productos bajo stock mínimo en todas las bodegas.</p>
                     <div class="reporte-card__actions">
+                        <a href="{% url 'dashboards:descargar_reporte' 'inventario' %}?preview=true" target="_blank" class="btn btn--sm btn--outline" title="Vista Previa">👁 Ver</a>
                         <a href="{% url 'dashboards:descargar_reporte' 'inventario' %}" class="btn btn--sm btn--primary">⬇ Descargar</a>
                         <a href="{% url 'dashboards:enviar_reporte' 'inventario' %}" class="btn btn--sm btn--outline"> Enviar</a>
                     </div>
@@ -87,6 +90,7 @@
                     <h3>Clientes Principales</h3>
                     <p>Top 20 clientes por volumen total de compras.</p>
                     <div class="reporte-card__actions">
+                        <a href="{% url 'dashboards:descargar_reporte' 'clientes' %}?preview=true" target="_blank" class="btn btn--sm btn--outline" title="Vista Previa">👁 Ver</a>
                         <a href="{% url 'dashboards:descargar_reporte' 'clientes' %}" class="btn btn--sm btn--primary">⬇ Descargar</a>
                         <a href="{% url 'dashboards:enviar_reporte' 'clientes' %}" class="btn btn--sm btn--outline"> Enviar</a>
                     </div>
@@ -96,6 +100,7 @@
                     <h3>Alianzas Estratégicas</h3>
                     <p>Estado de todas las alianzas con clínicas e instituciones.</p>
                     <div class="reporte-card__actions">
+                        <a href="{% url 'dashboards:descargar_reporte' 'alianzas' %}?preview=true" target="_blank" class="btn btn--sm btn--outline" title="Vista Previa">👁 Ver</a>
                         <a href="{% url 'dashboards:descargar_reporte' 'alianzas' %}" class="btn btn--sm btn--primary">⬇ Descargar</a>
                         <a href="{% url 'dashboards:enviar_reporte' 'alianzas' %}" class="btn btn--sm btn--outline"> Enviar</a>
                     </div>
@@ -105,6 +110,7 @@
                     <h3>Rendimiento Vendedores</h3>
                     <p>Referidos, ventas y comisiones por vendedor.</p>
                     <div class="reporte-card__actions">
+                        <a href="{% url 'dashboards:descargar_reporte' 'vendedores' %}?preview=true" target="_blank" class="btn btn--sm btn--outline" title="Vista Previa">👁 Ver</a>
                         <a href="{% url 'dashboards:descargar_reporte' 'vendedores' %}" class="btn btn--sm btn--primary">⬇ Descargar</a>
                         <a href="{% url 'dashboards:enviar_reporte' 'vendedores' %}" class="btn btn--sm btn--outline"> Enviar</a>
                     </div>
@@ -208,6 +214,11 @@ function getDateParams() {
     if (desde) params += '?fecha_desde=' + desde;
     if (hasta) params += (params ? '&' : '?') + 'fecha_hasta=' + hasta;
     return params;
+}
+function previsualizarReporte(tipo) {
+    const params = getDateParams();
+    const url = "{% url 'dashboards:descargar_reporte' 'ventas' %}".replace('ventas', tipo) + params + (params ? '&' : '?') + 'preview=true';
+    window.open(url, '_blank');
 }
 function descargarReporte(tipo) {
     const params = getDateParams();
