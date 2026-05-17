@@ -35,3 +35,17 @@
     </div>
 </section>
 {% endblock %}
+
+{% block js_extra %}
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('timeout')) {
+            // Mostrar un popup nativo que bloquea y no se cierra automático
+            alert("Tu cuenta se ha cerrado por inactividad.");
+            // Limpiar la URL para que no vuelva a salir si recarga
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    });
+</script>
+{% endblock %}

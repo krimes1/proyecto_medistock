@@ -45,8 +45,9 @@ MIDDLEWARE = [
     'core.middleware.VendedorReferidoMiddleware',
 ]
 
-# Configuración de Seguridad de Sesiones
-SESSION_COOKIE_AGE = 1800  # La sesión expira tras 30 minutos (1800 segundos) de inactividad
+# Configuración de Seguridad de Sesiones (Timeout por inactividad)
+SESSION_COOKIE_AGE = 600  # La sesión expira tras 10 minutos (600 segundos) de inactividad
+SESSION_SAVE_EVERY_REQUEST = True  # Renueva la expiración en cada petición para medir inactividad real
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # La sesión se cierra al cerrar el navegador
 SESSION_COOKIE_SECURE = not DEBUG  # En producción (DEBUG=False) requiere HTTPS
 CSRF_COOKIE_SECURE = not DEBUG
@@ -129,8 +130,3 @@ EMAIL_HOST_PASSWORD = 'elkmblejkejlpyta'
 DEFAULT_FROM_EMAIL = 'MediStock <medistock.soporte@gmail.com>'
 EMAIL_SUBJECT_PREFIX = '[MediStock] '
 
-# Configuración de Seguridad de Sesiones
-# Expira la sesión cuando el usuario cierra el navegador
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-# Opcional: Tiempo de expiración de la sesión en segundos (ej. 30 minutos = 1800)
-SESSION_COOKIE_AGE = 1800

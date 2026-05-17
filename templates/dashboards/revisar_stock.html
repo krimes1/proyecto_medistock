@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block titulo %}Revisar Stock{% endblock %}
+
+{% block css_extra %}
+<style>
+    .stock-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--white);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+    }
+    .stock-toolbar .form-group { margin-bottom: 0; flex: 1; min-width: 180px; }
+    .stock-toolbar .form-group label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .stock-kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stock-kpi {
+        background: var(--white);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        padding: 1.2rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border-top: 4px solid var(--primary);
+    }
+    .stock-kpi--warning { border-top-color: var(--warning); }
+    .stock-kpi--danger { border-top-color: var(--danger); }
+    .stock-kpi--success { border-top-color: var(--success); }
+    .stock-kpi__numero { font-size: 2rem; font-weight: 800; color: var(--dark); }
+    .stock-kpi__label { font-size: 0.8rem; color: var(--gray-500); margin-top: 0.2rem; }
+
+    .stock-producto {
+        background: var(--white);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+    .stock-producto:hover { box-shadow: var(--shadow-md); }
+    .stock-producto__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background: var(--gray-100);
+        cursor: pointer;
+        user-select: none;
+        gap: 1rem;
+    }
+    .stock-producto__header:hover { background: var(--primary-light); }
+    .stock-producto__info { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+    .stock-producto__nombre { font-weight: 700; font-size: 1rem; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stock-producto__sku { font-size: 0.8rem; color: var(--gray-500); }
+    .stock-producto__categoria { font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 600; white-space: nowrap; }
+    .stock-producto__meta { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+    .stock-producto__total {
+        font-size: 1.4rem;
+        font-weight: 800;
+        min-width: 60px;
+        text-align: center;
+    }
+    .stock-producto__total--ok { color: var(--success); }
+    .stock-producto__total--critico { color: var(--warning); }
+    .stock-producto__total--agotado { color: var(--danger); }
+    .stock-producto__toggle {
+        width: 32px; height: 32px; border: none; background: var(--white);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: var(--transition); color: var(--gray-500);
+        box-shadow: var(--shadow-sm);
+    }
+    .stock-producto__toggle:hover { background: var(--primary); color: white; }
+    .stock-producto__toggle svg { width: 16px; height: 16px; transition: transform 0.3s ease; }
+    .stock-producto.open .stock-producto__toggle svg { transform: rotate(180deg); }
+
+    .stock-producto__body {
+        display: none;
+        padding: 0 1.5rem 1.5rem;
+        border-top: 1px solid var(--gray-300);
+    }
+    .stock-producto.open .stock-producto__body { display: block; }
+
+    .stock-item {
+        display: grid;
+        grid-template-columns: 1fr 1fr 120px 100px 100px 80px;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 0.9rem;
+    }
+    .stock-item:last-child { border-bottom: none; }
+    .stock-item__label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .stock-item__input {
+        width: 80px;
+        padding: 0.4rem 0.6rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        font-family: inherit;
+        text-align: center;
+        transition: var(--transition);
+    }
+    .stock-item__input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(10,110,189,0.1); }
+    .stock-item__save {
+        padding: 0.35rem 0.7rem;
+        background: var(--secondary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .stock-item__save:hover { background: var(--secondary-dark); transform: scale(1.05); }
+    .stock-item__save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .stock-item__saved {
+        color: var(--success);
+        font-size: 0.8rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .stock-item__saved.show { opacity: 1; }
+
+    .stock-producto__actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-300);
+    }
+
+    .reporte-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+        backdrop-filter: blur(4px);
+    }
+    .reporte-modal {
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        width: 90%;
+        max-width: 480px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        z-index: 9999;
+    }
+    .reporte-modal h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--dark); }
+    .reporte-modal .form-group { margin-bottom: 1.2rem; }
+    .reporte-modal__actions { display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+    @media (max-width: 968px) {
+        .stock-item { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+        .stock-producto__header { flex-wrap: wrap; }
+        .stock-item { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<section class="page-header page-header--dark">
+    <div class="container">
+        <h1 class="page-header__title">Revisar Stock</h1>
+        <p class="page-header__subtitle">Control y actualizacion manual de inventario</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <!-- Barra de herramientas -->
+        <form method="get" class="stock-toolbar" id="stockFilterForm">
+            <div class="form-group">
+                <label for="searchInput">Buscar</label>
+                <input type="text" name="q" id="searchInput" class="form-control" placeholder="Nombre, SKU o marca..." value="{{ busqueda }}">
+            </div>
+            <div class="form-group" style="min-width:160px;">
+                <label for="catFilter">Categoria</label>
+                <select name="categoria" id="catFilter" class="form-control">
+                    <option value="">Todas</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.slug }}" {% if categoria_filtro == cat.slug %}selected{% endif %}>{{ cat.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="min-width:140px;">
+                <label for="estadoFilter">Estado</label>
+                <select name="estado" id="estadoFilter" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="ok" {% if estado_filtro == 'ok' %}selected{% endif %}>OK</option>
+                    <option value="critico" {% if estado_filtro == 'critico' %}selected{% endif %}>Bajo Stock</option>
+                    <option value="agotado" {% if estado_filtro == 'agotado' %}selected{% endif %}>Agotado</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:flex-end;">
+                <button type="submit" class="btn btn--sm btn--primary">Filtrar</button>
+                <a href="{% url 'dashboards:revisar_stock' %}" class="btn btn--sm btn--outline" style="font-size:0.8rem;">Limpiar</a>
+            </div>
+        </form>
+
+        <!-- KPIs -->
+        {% with total=total_productos %}
+        <div class="stock-kpis">
+            <div class="stock-kpi">
+                <div class="stock-kpi__numero">{{ total }}</div>
+                <div class="stock-kpi__label">Productos</div>
+            </div>
+            <div class="stock-kpi stock-kpi--success">
+                <div class="stock-kpi__numero" id="kpiOk">0</div>
+                <div class="stock-kpi__label">Stock OK</div>
+            </div>
+            <div class="stock-kpi stock-kpi--warning">
+                <div class="stock-kpi__numero" id="kpiBajo">0</div>
+                <div class="stock-kpi__label">Bajo Stock</div>
+            </div>
+            <div class="stock-kpi stock-kpi--danger">
+                <div class="stock-kpi__numero" id="kpiAgotado">0</div>
+                <div class="stock-kpi__label">Agotado</div>
+            </div>
+        </div>
+        {% endwith %}
+
+        <!-- Acciones globales de reporte -->
+        <div style="display:flex;gap:0.8rem;margin-bottom:2rem;flex-wrap:wrap;">
+            <a href="{% url 'dashboards:descargar_reporte_stock' %}" class="btn btn--sm btn--primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar Reporte Completo (PDF)
+            </a>
+            <button type="button" class="btn btn--sm btn--secondary" onclick="abrirModalEnvio('')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Enviar Reporte por Email
+            </button>
+            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--outline">← Volver al Dashboard</a>
+        </div>
+
+        <!-- Lista de productos -->
+        {% if productos_stock %}
+            {% for ps in productos_stock %}
+            <div class="stock-producto" data-producto-id="{{ ps.producto.pk }}" data-estado="{{ ps.estado }}">
+                <div class="stock-producto__header" onclick="toggleProducto(this)">
+                    <div class="stock-producto__info">
+                        <div>
+                            <div class="stock-producto__nombre">{{ ps.producto.nombre }}</div>
+                            <div class="stock-producto__sku">SKU: {{ ps.producto.sku }} {% if ps.producto.marca %}· {{ ps.producto.marca.nombre }}{% endif %}</div>
+                        </div>
+                        <span class="stock-producto__categoria">{{ ps.producto.categoria.nombre }}</span>
+                    </div>
+                    <div class="stock-producto__meta">
+                        <div>
+                            <div class="stock-producto__total stock-producto__total--{{ ps.estado }}" id="stockTotal-{{ ps.producto.pk }}">{{ ps.stock_total }}</div>
+                            <div style="font-size:0.75rem;color:var(--gray-500);text-align:center;">unidades</div>
+                        </div>
+                        <span class="badge {% if ps.estado == 'ok' %}badge--success{% elif ps.estado == 'critico' %}badge--warning{% else %}badge--danger{% endif %}" id="badgeEstado-{{ ps.producto.pk }}">
+                            {% if ps.estado == 'ok' %}OK{% elif ps.estado == 'critico' %}Bajo Stock{% else %}Agotado{% endif %}
+                        </span>
+                        <button class="stock-producto__toggle" type="button" title="Ver detalle">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="stock-producto__body">
+                    <!-- Header de items -->
+                    <div class="stock-item" style="border-bottom:2px solid var(--gray-300);padding-bottom:0.5rem;margin-top:1rem;">
+                        <div class="stock-item__label">Bodega</div>
+                        <div class="stock-item__label">Lote</div>
+                        <div class="stock-item__label">Vencimiento</div>
+                        <div class="stock-item__label">Stock Min.</div>
+                        <div class="stock-item__label">Cantidad</div>
+                        <div class="stock-item__label">Accion</div>
+                    </div>
+                    {% for item in ps.items %}
+                    <div class="stock-item" id="stockItem-{{ item.pk }}">
+                        <div>
+                            <strong>{{ item.bodega.nombre }}</strong>
+                            <div style="font-size:0.8rem;color:var(--gray-500);">{{ item.bodega.codigo }}</div>
+                        </div>
+                        <div><code>{{ item.numero_lote }}</code></div>
+                        <div>
+                            {{ item.fecha_vencimiento|date:"d/m/Y" }}
+                            {% if item.esta_vencido %}<span class="badge badge--danger" style="margin-left:0.3rem;">Vencido</span>{% endif %}
+                        </div>
+                        <div>{{ item.stock_minimo }}</div>
+                        <div>
+                            <input type="number" class="stock-item__input" id="input-{{ item.pk }}" value="{{ item.cantidad }}" min="0" data-original="{{ item.cantidad }}" data-item-id="{{ item.pk }}" data-producto-id="{{ ps.producto.pk }}">
+                        </div>
+                        <div style="display:flex;align-items:center;gap:0.3rem;">
+                            <button class="stock-item__save" onclick="guardarStock({{ item.pk }}, {{ ps.producto.pk }})" id="btnSave-{{ item.pk }}">Guardar</button>
+                            <span class="stock-item__saved" id="saved-{{ item.pk }}">OK</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted" style="padding:1rem 0;">Este producto no tiene registros de stock en ninguna bodega.</p>
+                    {% endfor %}
+                    <div class="stock-producto__actions">
+                        <a href="{% url 'dashboards:descargar_reporte_stock' %}?producto_id={{ ps.producto.pk }}" class="btn btn--sm btn--outline" style="font-size:0.8rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            PDF de este producto
+                        </a>
+                        <button type="button" class="btn btn--sm btn--outline" style="font-size:0.8rem;" onclick="abrirModalEnvio('{{ ps.producto.pk }}')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            Enviar por email
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                <h3>Sin resultados</h3>
+                <p>No se encontraron productos con los filtros aplicados.</p>
+                <a href="{% url 'dashboards:revisar_stock' %}" class="btn btn--sm btn--primary">Ver todos</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Modal de envio por email -->
+<div class="reporte-modal-overlay" id="modalOverlay" onclick="cerrarModal()"></div>
+<div class="reporte-modal" id="modalEnvio">
+    <h3>Enviar Reporte de Stock por Email</h3>
+    <form method="get" id="formEnvioEmail">
+        <input type="hidden" name="producto_id" id="modalProductoId" value="">
+        <div class="form-group">
+            <label for="modalEmail">Correo de destino</label>
+            <input type="email" name="email" id="modalEmail" class="form-control" placeholder="ejemplo@email.com" required>
+        </div>
+        <div class="form-group">
+            <label>Tipo de reporte</label>
+            <p class="text-muted" id="modalTipoLabel">Reporte completo de todos los productos</p>
+        </div>
+        <div class="reporte-modal__actions">
+            <button type="button" class="btn btn--sm btn--outline" onclick="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn--sm btn--primary">Enviar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block js_extra %}
+<script>
+    // KPI counter update
+    document.addEventListener('DOMContentLoaded', function() {
+        let ok = 0, bajo = 0, agotado = 0;
+        document.querySelectorAll('.stock-producto').forEach(el => {
+            const estado = el.dataset.estado;
+            if (estado === 'ok') ok++;
+            else if (estado === 'critico') bajo++;
+            else agotado++;
+        });
+        document.getElementById('kpiOk').textContent = ok;
+        document.getElementById('kpiBajo').textContent = bajo;
+        document.getElementById('kpiAgotado').textContent = agotado;
+    });
+
+    // Toggle producto accordion
+    function toggleProducto(header) {
+        header.closest('.stock-producto').classList.toggle('open');
+    }
+
+    // Guardar stock via AJAX
+    function guardarStock(itemId, productoId) {
+        const input = document.getElementById('input-' + itemId);
+        const btn = document.getElementById('btnSave-' + itemId);
+        const savedLabel = document.getElementById('saved-' + itemId);
+        const nuevaCantidad = parseInt(input.value);
+
+        if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
+            input.style.borderColor = 'var(--danger)';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        fetch(`{% url 'dashboards:actualizar_stock' item_id=0 %}`.replace('/0/', '/' + itemId + '/'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ cantidad: nuevaCantidad }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                input.dataset.original = data.nueva_cantidad;
+                input.style.borderColor = 'var(--success)';
+
+                // Update stock total
+                const totalEl = document.getElementById('stockTotal-' + productoId);
+                if (totalEl) {
+                    totalEl.textContent = data.stock_total;
+                    totalEl.className = 'stock-producto__total stock-producto__total--' + data.estado;
+                }
+
+                // Update badge
+                const badgeEl = document.getElementById('badgeEstado-' + productoId);
+                if (badgeEl) {
+                    badgeEl.className = 'badge';
+                    if (data.estado === 'ok') { badgeEl.className += ' badge--success'; badgeEl.textContent = 'OK'; }
+                    else if (data.estado === 'critico') { badgeEl.className += ' badge--warning'; badgeEl.textContent = 'Bajo Stock'; }
+                    else { badgeEl.className += ' badge--danger'; badgeEl.textContent = 'Agotado'; }
+                }
+
+                // Update parent data-estado
+                const productoEl = document.querySelector(`.stock-producto[data-producto-id="${productoId}"]`);
+                if (productoEl) productoEl.dataset.estado = data.estado;
+
+                // Show saved indicator
+                savedLabel.classList.add('show');
+                setTimeout(() => {
+                    savedLabel.classList.remove('show');
+                    input.style.borderColor = 'var(--gray-300)';
+                }, 2000);
+
+                // Refresh KPI counters
+                actualizarKPIs();
+            } else {
+                input.style.borderColor = 'var(--danger)';
+                alert(data.error || 'Error al actualizar.');
+            }
+        })
+        .catch(() => {
+            input.style.borderColor = 'var(--danger)';
+            alert('Error de conexion.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Guardar';
+        });
+    }
+
+    function actualizarKPIs() {
+        let ok = 0, bajo = 0, agotado = 0;
+        document.querySelectorAll('.stock-producto').forEach(el => {
+            const estado = el.dataset.estado;
+            if (estado === 'ok') ok++;
+            else if (estado === 'critico') bajo++;
+            else agotado++;
+        });
+        document.getElementById('kpiOk').textContent = ok;
+        document.getElementById('kpiBajo').textContent = bajo;
+        document.getElementById('kpiAgotado').textContent = agotado;
+    }
+
+    // CSRF cookie helper
+    function getCookie(name) {
+        let value = null;
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) value = decodeURIComponent(c.substring(name.length + 1));
+        });
+        return value;
+    }
+
+    // Modal de envio
+    function abrirModalEnvio(productoId) {
+        document.getElementById('modalProductoId').value = productoId;
+        document.getElementById('modalTipoLabel').textContent = productoId
+            ? 'Reporte de un producto especifico'
+            : 'Reporte completo de todos los productos';
+        document.getElementById('formEnvioEmail').action = "{% url 'dashboards:enviar_reporte_stock' %}";
+        document.getElementById('modalOverlay').style.display = 'block';
+        document.getElementById('modalEnvio').style.display = 'block';
+        document.getElementById('modalEmail').focus();
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.getElementById('modalEnvio').style.display = 'none';
+    }
+
+    // Enter key on stock inputs
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.classList.contains('stock-item__input')) {
+            e.preventDefault();
+            const itemId = e.target.dataset.itemId;
+            const productoId = e.target.dataset.productoId;
+            guardarStock(parseInt(itemId), parseInt(productoId));
+        }
+    });
+</script>
+{% endblock %}

@@ -178,7 +178,7 @@ def enviar_cotizacion_email(request, cot_id):
         cot.estado = 'enviada'
         cot.save()
 
-    messages.success(request, f'✅ Cotización enviada a {cot.email_cliente}.')
+    messages.success(request, f' Cotización enviada a {cot.email_cliente}.')
     return redirect('dashboards:detalle_cotizacion', cot_id=cot.pk)
 
 
@@ -229,7 +229,7 @@ def convertir_cotizacion_pedido(request, cot_id):
     cot.pedido_generado = pedido
     cot.save()
 
-    messages.success(request, f'🎉 Cotización convertida al Pedido {pedido.numero_pedido}.')
+    messages.success(request, f' Cotización convertida al Pedido {pedido.numero_pedido}.')
     return redirect('dashboards:detalle_cotizacion', cot_id=cot.pk)
 
 

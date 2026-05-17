@@ -9,6 +9,11 @@ urlpatterns = [
     path('ejecutivo/', views.dashboard_ejecutivo, name='ejecutivo'),
     path('ejecutivo/stock/<int:bodega_id>/', views.stock_bodega, name='stock_bodega'),
     path('ejecutivo/aprobar/<int:pedido_id>/', views.aprobar_pedido, name='aprobar_pedido'),
+    path('ejecutivo/revisar-stock/', views.revisar_stock, name='revisar_stock'),
+    path('ejecutivo/actualizar-stock/<int:item_id>/', views.actualizar_stock, name='actualizar_stock'),
+    path('ejecutivo/reporte-stock/descargar/', views.descargar_reporte_stock, name='descargar_reporte_stock'),
+    path('ejecutivo/reporte-stock/enviar/', views.enviar_reporte_stock, name='enviar_reporte_stock'),
+    path('ejecutivo/pedidos-aprobados/', views.pedidos_aprobados, name='pedidos_aprobados'),
 
     # Operador Logístico
     path('logistica/', views.dashboard_logistica, name='logistica'),
@@ -17,6 +22,7 @@ urlpatterns = [
 
     # Analista de Finanzas
     path('analista/', views.dashboard_analista, name='analista'),
+    path('analista/revisar/<int:pago_id>/', views.revisar_transferencia, name='revisar_transferencia'),
     path('analista/confirmar/<int:pago_id>/', views.confirmar_transferencia, name='confirmar_transferencia'),
 
     # Administrador

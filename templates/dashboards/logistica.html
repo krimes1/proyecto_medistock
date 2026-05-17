@@ -5,111 +5,292 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
     <div class="container">
-        <h1 class="page-header__title">🚚 Dashboard — Operador Logístico</h1>
-        <p class="page-header__subtitle">Órdenes priorizadas por urgencia médica ({{ total_pedidos }} pendientes)</p>
+        <h1 class="page-header__title"> Dashboard — Operador Logístico{% if bodega_asignada %} — {{ bodega_asignada.nombre }}{% endif %}</h1>
+        <p class="page-header__subtitle">
+            {% if bodega_asignada %}
+                Órdenes de {{ bodega_asignada.nombre }} priorizadas por urgencia médica ({{ total_pedidos }} pendientes)
+            {% else %}
+                Órdenes priorizadas por urgencia médica — Todas las bodegas ({{ total_pedidos }} pendientes)
+            {% endif %}
+        </p>
     </div>
 </section>
 
 <section class="section section--white">
     <div class="container">
-        <!-- Órdenes Críticas -->
-        {% if criticos %}
-        <div class="urgencia-seccion urgencia--critico">
-            <h2>🔴 Crítico — Urgencia Médica ({{ criticos.count }})</h2>
-            <div class="tabla-responsive">
-                <table class="tabla">
-                    <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Bodega</th><th>Total</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                        {% for pedido in criticos %}
-                        <tr>
-                            <td><strong>{{ pedido.numero_pedido }}</strong></td>
-                            <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
-                            <td>{{ pedido.get_tipo_despacho_display }}</td>
-                            <td>{{ pedido.bodega.codigo|default:"Auto" }}</td>
-                            <td>${{ pedido.total|floatformat:0 }}</td>
-                            <td>{{ pedido.creado_en|date:"d/m H:i" }}</td>
-                            <td><span class="badge badge--warning">{{ pedido.get_estado_display }}</span></td>
-                            <td>
-                                {% if pedido.estado == 'aprobado' %}
-                                <a href="{% url 'dashboards:preparar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--primary">Preparar</a>
-                                {% elif pedido.estado == 'preparando' %}
-                                <a href="{% url 'dashboards:despachar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">Despachar</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <!-- Pestañas de Navegación -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">
+            <button id="btn-previos" class="btn btn--outline" onclick="mostrarSeccion('previos')" style="flex: 1; justify-content: center; font-size: 1.1rem;">
+                Aprobación Pendiente ({{ total_previos }})
+            </button>
+            <button id="btn-nuevos" class="btn btn--primary" onclick="mostrarSeccion('nuevos')" style="flex: 1; justify-content: center; font-size: 1.1rem;">
+                Por Preparar ({{ total_nuevos }})
+            </button>
+            <button id="btn-curso" class="btn btn--outline" onclick="mostrarSeccion('curso')" style="flex: 1; justify-content: center; font-size: 1.1rem;">
+                En Preparación ({{ total_curso }})
+            </button>
         </div>
-        {% endif %}
 
-        <!-- Órdenes Urgentes -->
-        {% if urgentes %}
-        <div class="urgencia-seccion urgencia--urgente">
-            <h2>🟡 Urgentes ({{ urgentes.count }})</h2>
-            <div class="tabla-responsive">
-                <table class="tabla">
-                    <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                        {% for pedido in urgentes %}
-                        <tr>
-                            <td><strong>{{ pedido.numero_pedido }}</strong></td>
-                            <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
-                            <td>{{ pedido.get_tipo_despacho_display }}</td>
-                            <td>${{ pedido.total|floatformat:0 }}</td>
-                            <td><span class="badge badge--warning">{{ pedido.get_estado_display }}</span></td>
-                            <td>
-                                {% if pedido.estado == 'aprobado' %}
-                                <a href="{% url 'dashboards:preparar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--primary">Preparar</a>
-                                {% elif pedido.estado == 'preparando' %}
-                                <a href="{% url 'dashboards:despachar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">Despachar</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
+        <!-- SECCIÓN: APROBACION PREVIA -->
+        <div id="seccion-previos" style="display: none;">
+            {% if total_previos == 0 %}
+                <div class="empty-state">
+                    <h3> Nada en espera</h3>
+                    <p>No hay pedidos recientes esperando aprobación del ejecutivo de cuentas o finanzas.</p>
+                </div>
+            {% endif %}
 
-        <!-- Órdenes Normales -->
-        {% if normales %}
-        <div class="urgencia-seccion">
-            <h2>🟢 Normales ({{ normales.count }})</h2>
-            <div class="tabla-responsive">
-                <table class="tabla">
-                    <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                        {% for pedido in normales %}
-                        <tr>
-                            <td><strong>{{ pedido.numero_pedido }}</strong></td>
-                            <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
-                            <td>{{ pedido.get_tipo_despacho_display }}</td>
-                            <td>${{ pedido.total|floatformat:0 }}</td>
-                            <td><span class="badge badge--warning">{{ pedido.get_estado_display }}</span></td>
-                            <td>
-                                {% if pedido.estado == 'aprobado' %}
-                                <a href="{% url 'dashboards:preparar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--primary">Preparar</a>
-                                {% elif pedido.estado == 'preparando' %}
-                                <a href="{% url 'dashboards:despachar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">Despachar</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            {% if previos_criticos %}
+            <div class="urgencia-seccion urgencia--critico">
+                <h2> Crítico — Urgencia Médica ({{ previos_criticos.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Fecha</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            {% for pedido in previos_criticos %}
+                            <tr style="opacity: 0.7;">
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td>{{ pedido.creado_en|date:"d/m H:i" }}</td>
+                                <td><span class="badge badge--secondary">Esperando Aprobación</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if not criticos and not urgentes and not normales %}
-        <div class="empty-state">
-            <h3>🎉 Sin pedidos pendientes</h3>
-            <p>Todos los pedidos han sido procesados.</p>
+            {% if previos_urgentes %}
+            <div class="urgencia-seccion urgencia--urgente">
+                <h2> Urgentes ({{ previos_urgentes.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            {% for pedido in previos_urgentes %}
+                            <tr style="opacity: 0.7;">
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><span class="badge badge--secondary">Esperando Aprobación</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if previos_normales %}
+            <div class="urgencia-seccion">
+                <h2> Normales ({{ previos_normales.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            {% for pedido in previos_normales %}
+                            <tr style="opacity: 0.7;">
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><span class="badge badge--secondary">Esperando Aprobación</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <!-- SECCIÓN: NUEVOS (POR PREPARAR) -->
+        <div id="seccion-nuevos" style="display: block;">
+            {% if total_nuevos == 0 %}
+                <div class="empty-state">
+                    <h3> No hay pedidos nuevos</h3>
+                    <p>No tienes órdenes pendientes de iniciar preparación en este momento.</p>
+                </div>
+            {% endif %}
+
+            {% if nuevos_criticos %}
+            <div class="urgencia-seccion urgencia--critico">
+                <h2> Crítico — Urgencia Médica ({{ nuevos_criticos.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                            {% for pedido in nuevos_criticos %}
+                            <tr>
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td>{{ pedido.creado_en|date:"d/m H:i" }}</td>
+                                <td><a href="{% url 'dashboards:preparar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--primary">Preparar Pedido</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if nuevos_urgentes %}
+            <div class="urgencia-seccion urgencia--urgente">
+                <h2> Urgentes ({{ nuevos_urgentes.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                            {% for pedido in nuevos_urgentes %}
+                            <tr>
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><a href="{% url 'dashboards:preparar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--primary">Preparar Pedido</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if nuevos_normales %}
+            <div class="urgencia-seccion">
+                <h2> Normales ({{ nuevos_normales.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                            {% for pedido in nuevos_normales %}
+                            <tr>
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><a href="{% url 'dashboards:preparar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--primary">Preparar Pedido</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECCIÓN: EN CURSO (PREPARANDO) -->
+        <div id="seccion-curso" style="display: none;">
+            {% if total_curso == 0 %}
+                <div class="empty-state">
+                    <h3> Nada en preparación</h3>
+                    <p>No tienes pedidos en curso actualmente.</p>
+                </div>
+            {% endif %}
+
+            {% if curso_criticos %}
+            <div class="urgencia-seccion urgencia--critico">
+                <h2> Crítico — Urgencia Médica ({{ curso_criticos.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                            {% for pedido in curso_criticos %}
+                            <tr>
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><a href="{% url 'dashboards:despachar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">Despachar Pedido</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if curso_urgentes %}
+            <div class="urgencia-seccion urgencia--urgente">
+                <h2> Urgentes ({{ curso_urgentes.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                            {% for pedido in curso_urgentes %}
+                            <tr>
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><a href="{% url 'dashboards:despachar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">Despachar Pedido</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if curso_normales %}
+            <div class="urgencia-seccion">
+                <h2> Normales ({{ curso_normales.count }})</h2>
+                <div class="tabla-responsive">
+                    <table class="tabla">
+                        <thead><tr><th>Pedido</th><th>Cliente</th><th>Despacho</th><th>Total</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                            {% for pedido in curso_normales %}
+                            <tr>
+                                <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                                <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                                <td><span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.tipo_despacho == 'normal' %}badge--warning{% else %}badge--primary{% endif %}">{{ pedido.get_tipo_despacho_display }}</span></td>
+                                <td>${{ pedido.total|floatformat:0 }}</td>
+                                <td><a href="{% url 'dashboards:despachar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">Despachar Pedido</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 </section>
+
+{% block js_extra %}
+<script>
+    function mostrarSeccion(seccion) {
+        // Actualizar vista
+        document.getElementById('seccion-previos').style.display = seccion === 'previos' ? 'block' : 'none';
+        document.getElementById('seccion-nuevos').style.display = seccion === 'nuevos' ? 'block' : 'none';
+        document.getElementById('seccion-curso').style.display = seccion === 'curso' ? 'block' : 'none';
+        
+        // Actualizar estilos de botones
+        const btnPrevios = document.getElementById('btn-previos');
+        const btnNuevos = document.getElementById('btn-nuevos');
+        const btnCurso = document.getElementById('btn-curso');
+        
+        // Reiniciar
+        btnPrevios.className = 'btn btn--outline';
+        btnNuevos.className = 'btn btn--outline';
+        btnCurso.className = 'btn btn--outline';
+        
+        // Activar el seleccionado
+        if (seccion === 'previos') {
+            btnPrevios.className = 'btn btn--primary';
+        } else if (seccion === 'nuevos') {
+            btnNuevos.className = 'btn btn--primary';
+        } else {
+            btnCurso.className = 'btn btn--primary';
+        }
+    }
+</script>
+{% endblock %}
 {% endblock %}

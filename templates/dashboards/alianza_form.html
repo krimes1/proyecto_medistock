@@ -4,7 +4,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
     <div class="container">
-        <h1 class="page-header__title">{% if es_edicion %}✏️ Editar Alianza{% else %}➕ Nueva Alianza Estratégica{% endif %}</h1>
+        <h1 class="page-header__title">{% if es_edicion %} Editar Alianza{% else %} Nueva Alianza Estratégica{% endif %}</h1>
         <p class="page-header__subtitle">{% if es_edicion %}Actualiza los datos de la alianza con {{ alianza.nombre_clinica }}{% else %}Registra una nueva alianza con una clínica o institución{% endif %}</p>
     </div>
 </section>
@@ -15,7 +15,7 @@
             <form method="post">
                 {% csrf_token %}
 
-                <h3 style="margin-bottom:1rem;color:var(--primary);">🏥 Datos de la Clínica</h3>
+                <h3 style="margin-bottom:1rem;color:var(--primary);"> Datos de la Clínica</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>{{ form.nombre_clinica.label }}</label>
@@ -41,7 +41,7 @@
                     </div>
                 </div>
 
-                <h3 style="margin:1.5rem 0 1rem;color:var(--primary);">👤 Datos del Contacto</h3>
+                <h3 style="margin:1.5rem 0 1rem;color:var(--primary);"> Datos del Contacto</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>{{ form.contacto_nombre.label }}</label>
@@ -57,7 +57,7 @@
                     {{ form.contacto_telefono }}
                 </div>
 
-                <h3 style="margin:1.5rem 0 1rem;color:var(--primary);">📋 Detalles del Convenio</h3>
+                <h3 style="margin:1.5rem 0 1rem;color:var(--primary);"> Detalles del Convenio</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>{{ form.tipo_alianza.label }}</label>

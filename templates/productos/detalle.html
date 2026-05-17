@@ -31,14 +31,14 @@
                 <div class="producto-detalle__precio">${{ producto.precio|floatformat:0 }} <small>CLP</small></div>
 
                 {% if producto.en_stock %}
-                    <span class="badge badge--success" style="font-size:0.9rem;padding:0.4rem 1rem;">✓ En Stock — {{ producto.stock_total }} unidades</span>
+                    <span class="badge badge--success" style="font-size:0.9rem;padding:0.4rem 1rem;"> En Stock — {{ producto.stock_total }} unidades</span>
                 {% else %}
-                    <span class="badge badge--danger" style="font-size:0.9rem;padding:0.4rem 1rem;">✗ Sin Stock</span>
+                    <span class="badge badge--danger" style="font-size:0.9rem;padding:0.4rem 1rem;"> Sin Stock</span>
                 {% endif %}
 
                 {% if producto.requiere_receta %}
                 <div class="alert alert--warning" style="margin-top:1rem;">
-                    ⚠️ Este producto requiere receta médica para su compra.
+                     Este producto requiere receta médica para su compra.
                 </div>
                 {% endif %}
 
@@ -51,14 +51,14 @@
                         <label for="cantidad">Cantidad:</label>
                         <input type="number" name="cantidad" id="cantidad" value="1" min="1" max="{{ producto.stock_total }}" class="form-control" style="width:80px;">
                     </div>
-                    <button type="submit" class="btn btn--primary btn--lg">🛒 Agregar al Carrito</button>
+                    <button type="submit" class="btn btn--primary btn--lg"> Agregar al Carrito</button>
                 </form>
                 {% endif %}
 
                 <!-- Stock por bodega -->
                 {% if stock_items %}
                 <div class="stock-bodegas">
-                    <h3>📦 Disponibilidad por Bodega</h3>
+                    <h3> Disponibilidad por Bodega</h3>
                     <table class="tabla">
                         <thead>
                             <tr>

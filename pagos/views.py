@@ -29,8 +29,30 @@ def iniciar_pago(request, pedido_id):
 
     if request.method == 'POST':
         metodo = request.POST.get('metodo', 'webpay_credito')
+        
+        if metodo == 'transferencia':
+            comprobante = request.FILES.get('comprobante')
+            if not comprobante:
+                messages.error(request, 'Debes adjuntar el comprobante de transferencia.')
+                return redirect('pagos:iniciar_pago', pedido_id=pedido.pk)
+                
+            pago, _ = Pago.objects.get_or_create(
+                pedido=pedido,
+                defaults={'metodo': metodo, 'monto': pedido.total, 'estado': 'pendiente'}
+            )
+            pago.metodo = metodo
+            pago.estado = 'pendiente'
+            pago.comprobante = comprobante
+            pago.save()
+            
+            # Enviar correo al analista
+            from pedidos.emails import enviar_alerta_transferencia_analista
+            enviar_alerta_transferencia_analista(pago)
+            
+            messages.success(request, 'Comprobante recibido. Un analista revisará tu transferencia pronto.')
+            return redirect('pagos:pago_exitoso', pedido_id=pedido.pk)
 
-        # Crear registro de pago
+        # Crear registro de pago para WebPay
         pago, _ = Pago.objects.get_or_create(
             pedido=pedido,
             defaults={

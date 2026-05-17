@@ -5,7 +5,7 @@
 {% block contenido %}
 <section class="page-header">
     <div class="container">
-        <h1 class="page-header__title">📦 Mis Pedidos</h1>
+        <h1 class="page-header__title"> Mis Pedidos</h1>
     </div>
 </section>
 
@@ -31,11 +31,7 @@
                         <td><strong>{{ pedido.numero_pedido }}</strong></td>
                         <td>{{ pedido.creado_en|date:"d/m/Y H:i" }}</td>
                         <td>
-                            <span class="badge
-                                {% if pedido.estado == 'entregado' %}badge--success
-                                {% elif pedido.estado == 'cancelado' %}badge--danger
-                                {% elif pedido.estado == 'despachado' %}badge--warning
-                                {% else %}badge--success{% endif %}">
+                            <span class="badge {% if pedido.estado == 'pendiente' %}badge--secondary{% elif pedido.estado == 'aprobado' or pedido.estado == 'preparando' %}badge--warning{% elif pedido.estado == 'despachado' or pedido.estado == 'entregado' %}badge--success{% elif pedido.estado == 'cancelado' %}badge--danger{% else %}badge--secondary{% endif %}">
                                 {{ pedido.get_estado_display }}
                             </span>
                         </td>

@@ -4,7 +4,7 @@
 <section class="page-header page-header--dark">
   <div class="container">
     <h1 class="page-header__title">
-      {% if es_edicion %}✏️ Editar Visita{% else %}➕ Registrar Visita{% endif %}
+      {% if es_edicion %} Editar Visita{% else %} Registrar Visita{% endif %}
     </h1>
     <p class="page-header__subtitle">
       {% if es_edicion %}Actualiza los datos de la visita{% else %}Registra una visita de asesoramiento a una institución{% endif %}
@@ -19,7 +19,7 @@
         {% csrf_token %}
 
         <h3 style="margin-bottom: 1rem; color: var(--primary)">
-          🏥 Institución
+           Institución
         </h3>
         <div class="form-group">
           <label>{{ form.nombre_institucion.label }}</label>
@@ -37,7 +37,7 @@
         </div>
 
         <h3 style="margin: 1.5rem 0 1rem; color: var(--primary)">
-          📋 Detalles de la Visita
+           Detalles de la Visita
         </h3>
         <div class="form-row">
           <div class="form-group">
@@ -63,7 +63,7 @@
         </div>
 
         <h3 style="margin: 1.5rem 0 1rem; color: var(--primary)">
-          📅 Seguimiento
+           Seguimiento
         </h3>
         <div class="form-group">
           <label>{{ form.proxima_accion.label }}</label>

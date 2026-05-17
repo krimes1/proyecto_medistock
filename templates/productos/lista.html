@@ -18,7 +18,7 @@
             <!-- Sidebar de filtros -->
             <aside class="catalogo-sidebar">
                 <div class="filtro-card">
-                    <h3 class="filtro-card__title">🔍 Buscar</h3>
+                    <h3 class="filtro-card__title"> Buscar</h3>
                     <form method="get" action="{% url 'productos:lista_productos' %}">
                         <input type="text" name="q" value="{{ query }}" placeholder="Buscar producto o SKU..." class="form-control">
                         <button type="submit" class="btn btn--primary btn--sm" style="width:100%;margin-top:0.5rem;">Buscar</button>
@@ -26,7 +26,7 @@
                 </div>
 
                 <div class="filtro-card">
-                    <h3 class="filtro-card__title">📂 Categorías</h3>
+                    <h3 class="filtro-card__title"> Categorías</h3>
                     <ul class="filtro-lista">
                         <li><a href="{% url 'productos:lista_productos' %}" class="{% if not categoria_actual %}filtro-lista__active{% endif %}">Todas</a></li>
                         {% for cat in categorias %}
@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="filtro-card">
-                    <h3 class="filtro-card__title">🏷️ Tipo</h3>
+                    <h3 class="filtro-card__title"> Tipo</h3>
                     <ul class="filtro-lista">
                         <li><a href="{% url 'productos:lista_productos' %}{% if categoria_actual %}?categoria={{ categoria_actual.slug }}{% endif %}" class="{% if not tipo_actual %}filtro-lista__active{% endif %}">Todos</a></li>
                         <li><a href="{% url 'productos:lista_productos' %}?tipo=descartable{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if tipo_actual == 'descartable' %}filtro-lista__active{% endif %}">Descartables</a></li>
@@ -51,7 +51,7 @@
                 </div>
 
                 <div class="filtro-card">
-                    <h3 class="filtro-card__title">📊 Ordenar</h3>
+                    <h3 class="filtro-card__title"> Ordenar</h3>
                     <ul class="filtro-lista">
                         <li><a href="?orden=nombre{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if orden_actual == 'nombre' %}filtro-lista__active{% endif %}">Nombre A-Z</a></li>
                         <li><a href="?orden=precio_asc{% if query %}&q={{ query }}{% endif %}{% if categoria_actual %}&categoria={{ categoria_actual.slug }}{% endif %}" class="{% if orden_actual == 'precio_asc' %}filtro-lista__active{% endif %}">Precio ↑</a></li>

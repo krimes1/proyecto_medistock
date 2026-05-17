@@ -3,7 +3,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
   <div class="container">
-    <h1 class="page-header__title">📄 Cotización {{ cotizacion.numero }}</h1>
+    <h1 class="page-header__title"> Cotización {{ cotizacion.numero }}</h1>
     <p class="page-header__subtitle">
       {{ cotizacion.nombre_cliente }} — {{ cotizacion.get_estado_display }}
     </p>
@@ -39,7 +39,7 @@
           <a
             href="{% url 'dashboards:editar_cotizacion' cotizacion.pk %}"
             class="btn btn--sm btn--outline"
-            >✏️ Editar</a
+            > Editar</a
           >
           {% endif %}
           <a
@@ -50,33 +50,33 @@
           <a
             href="{% url 'dashboards:enviar_cotizacion_email' cotizacion.pk %}"
             class="btn btn--sm btn--outline"
-            >📧 Enviar</a
+            > Enviar</a
           >
           {% if cotizacion.estado == 'borrador' %}
           <a
             href="{% url 'dashboards:cambiar_estado_cotizacion' cotizacion.pk 'enviada' %}"
             class="btn btn--sm btn--secondary"
-            >📨 Marcar Enviada</a
+            > Marcar Enviada</a
           >
           {% elif cotizacion.estado == 'enviada' %}
           <a
             href="{% url 'dashboards:cambiar_estado_cotizacion' cotizacion.pk 'aprobada' %}"
             class="btn btn--sm btn--secondary"
             style="background: var(--success); border-color: var(--success)"
-            >✅ Aprobar</a
+            > Aprobar</a
           >
           <a
             href="{% url 'dashboards:cambiar_estado_cotizacion' cotizacion.pk 'rechazada' %}"
             class="btn btn--sm btn--outline"
             style="border-color: var(--danger); color: var(--danger)"
-            >❌ Rechazar</a
+            > Rechazar</a
           >
           {% elif cotizacion.estado == 'aprobada' and not cotizacion.pedido_generado %}
           <a
             href="{% url 'dashboards:convertir_cotizacion_pedido' cotizacion.pk %}"
             class="btn btn--sm btn--secondary"
             style="background: var(--success); border-color: var(--success)"
-            >🔄 Convertir a Pedido</a
+            > Convertir a Pedido</a
           >
           {% endif %}
         </div>
@@ -91,7 +91,7 @@
           border: 1px solid var(--success);
         "
       >
-        ✅ <strong>Pedido generado:</strong> {{ cotizacion.pedido_generado.numero_pedido }}
+         <strong>Pedido generado:</strong> {{ cotizacion.pedido_generado.numero_pedido }}
       </div>
       {% endif %}
     </div>
@@ -99,7 +99,7 @@
     <div class="admin-grid">
       <!-- Info del cliente -->
       <div class="card">
-        <h2 class="card__title">👤 Datos del Cliente</h2>
+        <h2 class="card__title"> Datos del Cliente</h2>
         <div class="alianza-card__body">
           <div class="alianza-card__info">
             <span>Nombre:</span>
@@ -142,7 +142,7 @@
       <!-- Agregar producto -->
       {% if cotizacion.estado == 'borrador' or cotizacion.estado == 'enviada' %}
       <div class="card">
-        <h2 class="card__title">➕ Agregar Producto</h2>
+        <h2 class="card__title"> Agregar Producto</h2>
         <form
           method="post"
           action="{% url 'dashboards:agregar_item_cotizacion' cotizacion.pk %}"
@@ -183,7 +183,7 @@
     </div>
 
     <!-- Tabla de items -->
-    <h2 style="margin: 2rem 0 1rem">📦 Productos Cotizados</h2>
+    <h2 style="margin: 2rem 0 1rem"> Productos Cotizados</h2>
     {% if items %}
     <div class="tabla-responsive">
       <table class="tabla">
@@ -215,7 +215,7 @@
                 href="{% url 'dashboards:eliminar_item_cotizacion' cotizacion.pk item.pk %}"
                 class="btn btn--sm btn--outline"
                 style="border-color: var(--danger); color: var(--danger)"
-                >🗑</a
+                ></a
               >
             </td>
             {% endif %}

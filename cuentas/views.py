@@ -86,7 +86,10 @@ def activar_cuenta(request, uidb64, token):
 
 def vista_logout(request):
     """Cierre de sesión."""
+    inactividad = request.GET.get('inactividad')
     logout(request)
+    if inactividad:
+        return redirect('/cuenta/login/?timeout=1')
     messages.info(request, 'Has cerrado sesión.')
     return redirect('core:inicio')
 

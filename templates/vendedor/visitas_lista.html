@@ -3,7 +3,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
   <div class="container">
-    <h1 class="page-header__title">🩺 Asesoramiento Clínico</h1>
+    <h1 class="page-header__title"> Asesoramiento Clínico</h1>
     <p class="page-header__subtitle">
       Registro de visitas técnicas, capacitaciones y seguimiento a instituciones
     </p>
@@ -31,34 +31,34 @@
         <a
           href="?tipo=visita_tecnica"
           class="btn btn--sm {% if tipo_filtro == 'visita_tecnica' %}btn--primary{% else %}btn--outline{% endif %}"
-          >🔧 Técnicas</a
+          > Técnicas</a
         >
         <a
           href="?tipo=capacitacion"
           class="btn btn--sm {% if tipo_filtro == 'capacitacion' %}btn--primary{% else %}btn--outline{% endif %}"
-          >📚 Capacitaciones</a
+          > Capacitaciones</a
         >
         <a
           href="?tipo=demostracion"
           class="btn btn--sm {% if tipo_filtro == 'demostracion' %}btn--primary{% else %}btn--outline{% endif %}"
-          >🎯 Demos</a
+          > Demos</a
         >
         <a
           href="?tipo=seguimiento"
           class="btn btn--sm {% if tipo_filtro == 'seguimiento' %}btn--primary{% else %}btn--outline{% endif %}"
-          >📞 Seguimiento</a
+          > Seguimiento</a
         >
       </div>
       <a
         href="{% url 'dashboards:crear_visita' %}"
         class="btn btn--sm btn--secondary"
-        >➕ Registrar Visita</a
+        > Registrar Visita</a
       >
     </div>
 
     {% if pendientes > 0 %}
     <div class="alert alert--danger" style="margin-bottom: 1.5rem">
-      ⚠️ Tienes <strong>{{ pendientes }}</strong> visita{{ pendientes|pluralize:"s" }} pendiente{{ pendientes|pluralize:"s" }} de seguimiento.
+       Tienes <strong>{{ pendientes }}</strong> visita{{ pendientes|pluralize:"s" }} pendiente{{ pendientes|pluralize:"s" }} de seguimiento.
     </div>
     {% endif %}
     
@@ -115,13 +115,13 @@
           <a
             href="{% url 'dashboards:editar_visita' v.pk %}"
             class="btn btn--sm btn--primary"
-            >✏️ Editar</a
+            > Editar</a
           >
           <a
             href="{% url 'dashboards:eliminar_visita' v.pk %}"
             class="btn btn--sm btn--outline"
             style="border-color: var(--danger); color: var(--danger)"
-            >🗑</a
+            ></a
           >
         </div>
       </div>
@@ -129,7 +129,7 @@
     </div>
     {% else %}
     <div class="card" style="text-align: center; padding: 3rem">
-      <div style="font-size: 3rem">🩺</div>
+      <div style="font-size: 3rem"></div>
       <h3>Sin visitas registradas</h3>
       <p class="text-muted">
         Comienza registrando tu primera visita de asesoramiento.
@@ -138,7 +138,7 @@
         href="{% url 'dashboards:crear_visita' %}"
         class="btn btn--primary"
         style="margin-top: 1rem"
-        >➕ Registrar Visita</a
+        > Registrar Visita</a
       >
     </div>
     {% endif %}

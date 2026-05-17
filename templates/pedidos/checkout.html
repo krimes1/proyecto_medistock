@@ -5,7 +5,7 @@
 {% block contenido %}
 <section class="page-header">
     <div class="container">
-        <h1 class="page-header__title">📋 Checkout</h1>
+        <h1 class="page-header__title"> Checkout</h1>
         <p class="page-header__subtitle">Completa tu pedido</p>
     </div>
 </section>
@@ -16,7 +16,7 @@
             {% csrf_token %}
             <div class="checkout-form">
                 <div class="card">
-                    <h2 class="card__title">📍 Dirección de Envío</h2>
+                    <h2 class="card__title"> Dirección de Envío</h2>
                     <div class="form-group">
                         <label for="direccion">Dirección</label>
                         <textarea name="direccion" id="direccion" class="form-control" rows="2" required
@@ -43,12 +43,12 @@
                 </div>
 
                 <div class="card">
-                    <h2 class="card__title">🚚 Tipo de Despacho</h2>
+                    <h2 class="card__title"> Tipo de Despacho</h2>
                     <div class="despacho-opciones">
                         <label class="despacho-opcion">
                             <input type="radio" name="tipo_despacho" value="normal" checked>
                             <div class="despacho-opcion__card">
-                                <h4>📦 Despacho Normal</h4>
+                                <h4> Despacho Normal</h4>
                                 <p>5-7 días hábiles</p>
                                 <span class="despacho-opcion__precio">$2.990</span>
                             </div>
@@ -56,7 +56,7 @@
                         <label class="despacho-opcion">
                             <input type="radio" name="tipo_despacho" value="express">
                             <div class="despacho-opcion__card">
-                                <h4>⚡ Despacho Express</h4>
+                                <h4> Despacho Express</h4>
                                 <p>1-3 días hábiles</p>
                                 <span class="despacho-opcion__precio">$5.990</span>
                             </div>
@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="card">
-                    <h2 class="card__title">🏥 Prioridad Médica</h2>
+                    <h2 class="card__title"> Prioridad Médica</h2>
                     <select name="prioridad" class="form-control">
                         <option value="normal">Normal</option>
                         <option value="urgente">Urgente</option>
@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="card">
-                    <h2 class="card__title">📦 Bodega de Origen</h2>
+                    <h2 class="card__title"> Bodega de Origen</h2>
                     <select name="bodega" class="form-control">
                         <option value="">Automática (más cercana)</option>
                         {% for bodega in bodegas %}
@@ -84,12 +84,12 @@
                 </div>
 
                 <div class="card">
-                    <h2 class="card__title">📝 Notas</h2>
+                    <h2 class="card__title"> Notas</h2>
                     <textarea name="notas" class="form-control" rows="2" placeholder="Instrucciones especiales..."></textarea>
                 </div>
                 
                 <div class="card" style="border: 2px dashed var(--primary-color);">
-                    <h2 class="card__title" style="color: var(--primary-color);">🎁 Código de Vendedor / Descuento</h2>
+                    <h2 class="card__title" style="color: var(--primary-color);"> Código de Vendedor / Descuento</h2>
                     <p style="font-size: 0.9rem; margin-bottom: 1rem; color: #666;">Ingresa el código de tu vendedor asignado para obtener un 5% de descuento en el subtotal de tu compra.</p>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="text" id="codigo_vendedor_input" name="codigo_vendedor" class="form-control" placeholder="Ingresa tu código aquí" value="{{ codigo_vendedor_sesion }}">
@@ -113,7 +113,7 @@
                         <span id="ui-subtotal" data-valor="{{ carrito.total|stringformat:'f' }}">${{ carrito.total|floatformat:0 }}</span>
                     </div>
                     <div class="carrito-resumen__linea" id="linea-descuento" style="display: none; color: var(--success); font-weight: 600;">
-                        <span>🎉 Descuento Vendedor (5%)</span>
+                        <span> Descuento Vendedor (5%)</span>
                         <span id="ui-descuento">-$0</span>
                     </div>
                     <div class="carrito-resumen__linea" style="color: var(--danger);">

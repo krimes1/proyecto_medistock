@@ -6,9 +6,14 @@
 <section class="section section--white" style="min-height:60vh;display:flex;align-items:center;">
     <div class="container" style="max-width:650px;">
         <div style="text-align:center;margin-bottom:2rem;">
-            <div class="confirmacion-icon" style="font-size:4rem;">✅</div>
-            <h1 style="font-size:2rem;margin:1rem 0;">¡Pago Exitoso!</h1>
-            <p class="text-muted">Tu pago ha sido procesado correctamente a través de WebPay Plus.</p>
+            <div class="confirmacion-icon" style="font-size:4rem;"></div>
+            {% if pago.metodo == 'transferencia' %}
+                <h1 style="font-size:2rem;margin:1rem 0;"> Transferencia Recibida</h1>
+                <p class="text-muted">Hemos recibido tu comprobante. Un analista validará tu pago a la brevedad.</p>
+            {% else %}
+                <h1 style="font-size:2rem;margin:1rem 0;">¡Pago Exitoso!</h1>
+                <p class="text-muted">Tu pago ha sido procesado correctamente a través de WebPay Plus.</p>
+            {% endif %}
         </div>
 
         <div class="card">
@@ -23,7 +28,7 @@
 
         {% if boleta %}
         <div class="card" style="margin-top:1rem;">
-            <h3 class="card__title">📄 Boleta Electrónica</h3>
+            <h3 class="card__title"> Boleta Electrónica</h3>
             <div class="carrito-resumen__linea"><span>Nº Boleta</span><span>{{ boleta.numero_boleta }}</span></div>
             <div class="carrito-resumen__linea"><span>Monto Neto</span><span>${{ boleta.monto_neto|floatformat:0 }}</span></div>
             <div class="carrito-resumen__linea"><span>IVA (19%)</span><span>${{ boleta.monto_iva|floatformat:0 }}</span></div>
@@ -31,6 +36,17 @@
             <a href="{% url 'pagos:ver_boleta' pedido_id=pedido.pk %}" class="btn btn--outline btn--sm" style="margin-top:0.5rem;">Ver Boleta Completa</a>
         </div>
         {% endif %}
+
+        <div style="margin-top:2rem; background: var(--bg-color); padding: 1.5rem; border-radius: 8px; border: 1px dashed var(--primary-color); text-align: center;">
+            <h3 style="margin-bottom: 0.5rem; color: var(--primary-color);">Rastrea tu pedido</h3>
+            <p class="text-muted" style="margin-bottom: 1rem;">Copia el siguiente código para ver el estado de tu pedido en la página de Seguimiento:</p>
+            <div style="font-size: 1.5rem; font-weight: bold; background: white; padding: 0.8rem; border-radius: 4px; display: inline-block; letter-spacing: 2px;">
+                {{ pedido.numero_pedido }}
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                <a href="{% url 'envios:tracking' %}?numero={{ pedido.numero_pedido }}" class="btn btn--outline btn--sm" target="_blank">Ir a Rastreo</a>
+            </p>
+        </div>
 
         <div style="display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap;">
             <a href="{% url 'pedidos:detalle' pedido_id=pedido.pk %}" class="btn btn--primary">Ver Pedido</a>

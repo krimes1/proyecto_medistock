@@ -55,6 +55,17 @@ class Pedido(models.Model):
     def __str__(self):
         return f"Pedido {self.numero_pedido} - {self.get_estado_display()}"
 
+    def get_estado_display(self):
+        estado_dict = dict(self.OPCIONES_ESTADO)
+        base_display = estado_dict.get(self.estado, self.estado)
+        if self.estado == 'aprobado':
+            bodega_nombre = self.bodega.nombre if self.bodega else "Bodega Central"
+            return f"Esperando aprobación de logística - {bodega_nombre}"
+        if self.estado == 'cancelado':
+            bodega_nombre = self.bodega.nombre if self.bodega else "Bodega Central"
+            return f"Cancelado por - {bodega_nombre}"
+        return base_display
+
     def clean(self):
         super().clean()
         if self.pk:

@@ -13,10 +13,10 @@
     {% if not user.is_authenticated or not user.perfil.es_interno %}
     <div class="navbar__top">
         <div class="container">
-            <span>📍 Antonio Varas 666, 7500961 Providencia, Región Metropolitana — Lun-Vie 8:00 a 18:00</span>
+            <span> Antonio Varas 666, 7500961 Providencia, Región Metropolitana — Lun-Vie 8:00 a 18:00</span>
             <div>
-                <a href="tel:+56222392520">📞 +56 2 2239 2520</a> &nbsp;|&nbsp;
-                <a href="mailto:contacto@medistock.cl">✉ contacto@medistock.cl</a>
+                <a href="tel:+56222392520"> +56 2 2239 2520</a> &nbsp;|&nbsp;
+                <a href="mailto:contacto@medistock.cl"> contacto@medistock.cl</a>
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
                 <div class="navbar__actions">
                     {% if not user.is_authenticated or user.perfil.es_cliente %}
                         <a href="{% url 'carrito:detalle_carrito' %}" class="navbar__cart">
-                            🛒 Carrito
+                             Carrito
                             {% if cantidad_items_carrito %}<span class="navbar__cart-badge">{{ cantidad_items_carrito }}</span>{% endif %}
                         </a>
                     {% endif %}
@@ -64,28 +64,29 @@
                     {% if user.is_authenticated %}
                         <div class="user-menu" style="position:relative;display:inline-block; display:flex; align-items:center; gap:0.5rem;">
                             <a href="{% url 'cuentas:perfil' %}" class="btn btn--sm btn--outline" title="Mi Perfil">
-                                👤 {{ user.first_name|default:user.username }}
+                                 {{ user.first_name|default:user.username }}
                             </a>
                             
                             {% if user.perfil.es_cliente %}
                                 <a href="{% url 'cuentas:mis_pedidos' %}" class="btn btn--sm btn--outline" style="border-color:transparent;" title="Mis Pedidos">
-                                    📦 Mis Pedidos
+                                     Mis Pedidos
                                 </a>
                             {% endif %}
                         </div>
                         
                         {% if user.perfil.rol == 'administrador' %}
-                            <a href="{% url 'dashboards:administrador' %}" class="btn btn--sm btn--secondary">⚙️ Panel Admin</a>
+                            <a href="{% url 'dashboards:administrador' %}" class="btn btn--sm btn--secondary"> Panel Admin</a>
                         {% elif user.perfil.rol == 'ejecutivo' %}
-                            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--secondary">💼 Panel Ejecutivo</a>
+                            <a href="{% url 'dashboards:revisar_stock' %}" class="btn btn--sm btn--outline">Revisar Stock</a>
+                            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--secondary"> Panel Ejecutivo</a>
                         {% elif user.perfil.rol == 'logistica' %}
-                            <a href="{% url 'dashboards:logistica' %}" class="btn btn--sm btn--secondary">🚚 Panel Logística</a>
+                            <a href="{% url 'dashboards:logistica' %}" class="btn btn--sm btn--secondary"> Panel Logística{% if user.perfil.bodega %} — {{ user.perfil.bodega.nombre }}{% endif %}</a>
                         {% elif user.perfil.rol == 'analista' %}
-                            <a href="{% url 'dashboards:analista' %}" class="btn btn--sm btn--secondary">💰 Panel Finanzas</a>
+                            <a href="{% url 'dashboards:analista' %}" class="btn btn--sm btn--secondary"> Panel Finanzas</a>
                         {% elif user.perfil.rol == 'vendedor' %}
-                            <a href="{% url 'dashboards:lista_cotizaciones' %}" class="btn btn--sm btn--outline">📄 Cotizaciones</a>
-                            <a href="{% url 'dashboards:lista_visitas' %}" class="btn btn--sm btn--outline">🩺 Asesoramiento</a>
-                            <a href="{% url 'dashboards:vendedor' %}" class="btn btn--sm btn--secondary">🤝 Panel de Ventas</a>
+                            <a href="{% url 'dashboards:lista_cotizaciones' %}" class="btn btn--sm btn--outline"> Cotizaciones</a>
+                            <a href="{% url 'dashboards:lista_visitas' %}" class="btn btn--sm btn--outline"> Asesoramiento</a>
+                            <a href="{% url 'dashboards:vendedor' %}" class="btn btn--sm btn--secondary"> Panel de Ventas</a>
                         {% endif %}
                         
                         <a href="{% url 'cuentas:logout' %}" class="btn btn--sm btn--danger" style="margin-left:0.5rem;background:var(--danger);color:white;border-color:var(--danger);">Cerrar Sesión</a>
@@ -138,9 +139,9 @@
                 </div>
                 <div>
                     <h4 class="footer__heading">Contacto</h4>
-                    <div class="footer__contact-item">📍 Antonio Varas 666, 7500961 Providencia, Región Metropolitana</div>
-                    <div class="footer__contact-item">📞 +56 2 2239 2520</div>
-                    <div class="footer__contact-item">✉ contacto@medistock.cl</div>
+                    <div class="footer__contact-item"> Antonio Varas 666, 7500961 Providencia, Región Metropolitana</div>
+                    <div class="footer__contact-item"> +56 2 2239 2520</div>
+                    <div class="footer__contact-item"> contacto@medistock.cl</div>
                 </div>
             </div>
         </div>
@@ -220,6 +221,27 @@
             }
         });
     </script>
+    {% if user.is_authenticated %}
+    <script>
+        // Timeout de inactividad: 10 minutos (600,000 ms)
+        let inactividadTimeout;
+        
+        function resetInactividadTimer() {
+            clearTimeout(inactividadTimeout);
+            inactividadTimeout = setTimeout(function() {
+                // Redirigir a logout indicando que fue por inactividad
+                window.location.href = "{% url 'cuentas:logout' %}?inactividad=1";
+            }, 600000);
+        }
+        
+        window.onload = resetInactividadTimer;
+        document.onmousemove = resetInactividadTimer;
+        document.onkeypress = resetInactividadTimer;
+        document.onclick = resetInactividadTimer;
+        document.onscroll = resetInactividadTimer;
+    </script>
+    {% endif %}
+
     {% block js_extra %}{% endblock %}
 </body>
 </html>

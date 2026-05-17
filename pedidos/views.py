@@ -55,6 +55,12 @@ def checkout(request):
         impuesto = (subtotal_con_descuento * Decimal('0.19')).quantize(Decimal('1'))
         total = subtotal_con_descuento + costo_envio + impuesto
 
+        # Asignar bodega automática si no se seleccionó una
+        if not bodega_id:
+            bodega_default = Bodega.objects.filter(activa=True).first()
+            if bodega_default:
+                bodega_id = bodega_default.pk
+
         # Crear pedido
         pedido = Pedido.objects.create(
             usuario=request.user,

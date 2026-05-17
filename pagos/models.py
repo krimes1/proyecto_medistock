@@ -24,6 +24,11 @@ class Pago(models.Model):
     codigo_autorizacion = models.CharField(max_length=50, blank=True, verbose_name='Codigo de Autorizacion')
     ultimos_cuatro = models.CharField(max_length=4, blank=True, verbose_name='Ultimos 4 digitos')
     confirmado_por = models.ForeignKey('auth.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='pagos_confirmados', verbose_name='Confirmado por')
+    comprobante = models.FileField(upload_to='comprobantes/', blank=True, null=True, verbose_name='Comprobante de Transferencia')
+    auditado_por = models.ForeignKey('auth.User', null=True, blank=True, on_delete=models.SET_NULL, related_name='pagos_auditados', verbose_name='Auditado por')
+    auditado_en = models.DateTimeField(null=True, blank=True, verbose_name='Fecha de Auditoria')
+    notas_tributarias = models.TextField(blank=True, verbose_name='Notas Tributarias')
+    cumple_politicas = models.BooleanField(default=False, verbose_name='Cumple Politicas')
     creado_en = models.DateTimeField(auto_now_add=True, verbose_name='Creado')
     completado_en = models.DateTimeField(null=True, blank=True, verbose_name='Completado el')
 

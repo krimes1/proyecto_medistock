@@ -3,7 +3,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
   <div class="container">
-    <h1 class="page-header__title">💰 Dashboard — Analista de Finanzas</h1>
+    <h1 class="page-header__title"> Dashboard — Analista de Finanzas</h1>
     <p class="page-header__subtitle">
       Confirmación de transferencias y auditoría de pagos
     </p>
@@ -37,7 +37,7 @@
     <!-- Transferencias pendientes -->
     {% if pagos_pendientes %}
     <h2 style="margin: 2rem 0 1rem">
-      ⏳ Transferencias Pendientes de Confirmación
+       Transferencias Pendientes de Confirmación
     </h2>
     <div class="tabla-responsive">
       <table class="tabla">
@@ -62,10 +62,9 @@
             <td>
               {% if pago.metodo == 'transferencia' %}
               <a
-                href="{% url 'dashboards:confirmar_transferencia' pago_id=pago.pk %}"
+                href="{% url 'dashboards:revisar_transferencia' pago_id=pago.pk %}"
                 class="btn btn--sm btn--secondary"
-                >✓ Confirmar</a
-              >
+                > Revisar</a>
               {% endif %}
             </td>
           </tr>
@@ -76,7 +75,7 @@
     {% endif %}
 
     <!-- Pagos completados (auditoría) -->
-    <h2 style="margin: 2rem 0 1rem">✅ Últimas Transacciones Completadas</h2>
+    <h2 style="margin: 2rem 0 1rem"> Últimas Transacciones Completadas</h2>
     {% if pagos_completados %}
     <div class="tabla-responsive">
       <table class="tabla">

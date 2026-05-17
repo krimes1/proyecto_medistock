@@ -39,8 +39,8 @@ class WebPayPlusSimulado:
 
         Retorna datos de la transacción como los devolvería Transbank.
         """
-        # Simulamos 90% de aprobación
-        aprobado = random.random() < 0.9
+        # Simulamos 100% de aprobación para pruebas (antes 90%)
+        aprobado = True
         codigo_auth = ''.join(random.choices(string.digits, k=6)) if aprobado else ''
         ultimos_4 = ''.join(random.choices(string.digits, k=4))
 

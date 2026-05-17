@@ -13,28 +13,24 @@ def tracking_publico(request):
 
     if numero:
         # Primero buscar por número de seguimiento en Envio
-        try:
-            envio = Envio.objects.select_related('pedido__usuario').get(
-                numero_seguimiento__iexact=numero
-            )
+        envio = Envio.objects.select_related('pedido__usuario').filter(
+            numero_seguimiento__icontains=numero
+        ).first()
+
+        if envio:
             pedido = envio.pedido
             eventos = envio.eventos.all().order_by('-fecha_hora')
-        except Envio.DoesNotExist:
-            envio = None
-
-        # Si no se encontró envío, buscar por número de pedido
-        if not envio:
+        else:
+            # Si no se encontró envío, buscar por número de pedido
             from pedidos.models import Pedido
-            try:
-                pedido = Pedido.objects.get(numero_pedido__iexact=numero)
-                # Intentar obtener el envío asociado al pedido
+            pedido = Pedido.objects.filter(numero_pedido__icontains=numero).first()
+            if pedido:
                 try:
                     envio = pedido.envio
                     eventos = envio.eventos.all().order_by('-fecha_hora')
-                except Envio.DoesNotExist:
+                except Exception: # Puede ser RelatedObjectDoesNotExist o Envio.DoesNotExist
                     envio = None
-            except Pedido.DoesNotExist:
-                pedido = None
+                    eventos = []
 
     contexto = {
         'numero': numero,

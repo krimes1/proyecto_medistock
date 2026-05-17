@@ -5,41 +5,50 @@
 {% block contenido %}
 <section class="page-header">
     <div class="container">
-        <h1 class="page-header__title">💳 Método de Pago</h1>
+        <h1 class="page-header__title"> Método de Pago</h1>
         <p class="page-header__subtitle">Pedido {{ pedido.numero_pedido }} — Total: ${{ pedido.total|floatformat:0 }} CLP</p>
     </div>
 </section>
 
 <section class="section section--white">
     <div class="container" style="max-width:700px;">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="metodo-pago-grid">
                 <label class="metodo-pago-card">
-                    <input type="radio" name="metodo" value="webpay_credito" checked>
+                    <input type="radio" name="metodo" value="webpay_credito" checked onclick="toggleTransferencia(false)">
                     <div class="metodo-pago-card__body">
-                        <div class="metodo-pago-card__icon">💳</div>
+                        <div class="metodo-pago-card__icon"></div>
                         <h3>WebPay Crédito</h3>
                         <p>Paga con tu tarjeta de crédito a través de WebPay Plus</p>
                         <span class="badge badge--success">Recomendado</span>
                     </div>
                 </label>
                 <label class="metodo-pago-card">
-                    <input type="radio" name="metodo" value="webpay_debito">
+                    <input type="radio" name="metodo" value="webpay_debito" onclick="toggleTransferencia(false)">
                     <div class="metodo-pago-card__body">
-                        <div class="metodo-pago-card__icon">🏦</div>
+                        <div class="metodo-pago-card__icon"></div>
                         <h3>WebPay Débito</h3>
                         <p>Paga directamente desde tu cuenta bancaria</p>
                     </div>
                 </label>
                 <label class="metodo-pago-card">
-                    <input type="radio" name="metodo" value="transferencia">
+                    <input type="radio" name="metodo" value="transferencia" onclick="toggleTransferencia(true)">
                     <div class="metodo-pago-card__body">
-                        <div class="metodo-pago-card__icon">🔄</div>
+                        <div class="metodo-pago-card__icon"></div>
                         <h3>Transferencia Bancaria</h3>
                         <p>Realiza una transferencia y un analista confirmará tu pago</p>
                     </div>
                 </label>
+            </div>
+
+            <div id="transferencia-info" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px;">
+                <h4>Datos para Transferencia</h4>
+                <p>Banco Estado<br>Cuenta Corriente: 123456789<br>RUT: 76.000.000-0<br>Nombre: MediStock SpA<br>Email: pagos@medistock.cl</p>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="comprobante" style="font-weight:600;">Sube tu comprobante de transferencia (PDF/JPG/PNG):</label>
+                    <input type="file" name="comprobante" id="comprobante" accept=".pdf,image/*" style="display:block;margin-top:0.5rem;">
+                </div>
             </div>
 
             <div class="card" style="margin-top:2rem;">
@@ -58,9 +67,18 @@
             </div>
 
             <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;margin-top:1.5rem;">
-                Pagar ${{ pedido.total|floatformat:0 }} CLP →
+                Pagar / Enviar Comprobante →
             </button>
         </form>
     </div>
 </section>
+{% endblock %}
+
+{% block js_extra %}
+<script>
+    function toggleTransferencia(show) {
+        document.getElementById('transferencia-info').style.display = show ? 'block' : 'none';
+        document.getElementById('comprobante').required = show;
+    }
+</script>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
   <div class="container">
-    <h1 class="page-header__title">📄 Gestión de Cotizaciones</h1>
+    <h1 class="page-header__title"> Gestión de Cotizaciones</h1>
     <p class="page-header__subtitle">
       Crea, envía y administra cotizaciones para clínicas e instituciones
     </p>
@@ -55,33 +55,33 @@
         <a
           href="?estado=borrador"
           class="btn btn--sm {% if estado_filtro == 'borrador' %}btn--primary{% else %}btn--outline{% endif %}"
-          >📝 Borradores</a
+          > Borradores</a
         >
         <a
           href="?estado=enviada"
           class="btn btn--sm {% if estado_filtro == 'enviada' %}btn--primary{% else %}btn--outline{% endif %}"
-          >📨 Enviadas</a
+          > Enviadas</a
         >
         <a
           href="?estado=aprobada"
           class="btn btn--sm {% if estado_filtro == 'aprobada' %}btn--primary{% else %}btn--outline{% endif %}"
-          >✅ Aprobadas</a
+          > Aprobadas</a
         >
         <a
           href="?estado=rechazada"
           class="btn btn--sm {% if estado_filtro == 'rechazada' %}btn--primary{% else %}btn--outline{% endif %}"
-          >❌ Rechazadas</a
+          > Rechazadas</a
         >
         <a
           href="?estado=convertida"
           class="btn btn--sm {% if estado_filtro == 'convertida' %}btn--primary{% else %}btn--outline{% endif %}"
-          >🔄 Convertidas</a
+          > Convertidas</a
         >
       </div>
       <a
         href="{% url 'dashboards:crear_cotizacion' %}"
         class="btn btn--sm btn--secondary"
-        >➕ Nueva Cotización</a
+        > Nueva Cotización</a
       >
     </div>
 
@@ -128,14 +128,14 @@
     </div>
     {% else %}
     <div class="card" style="text-align: center; padding: 3rem">
-      <div style="font-size: 3rem">📄</div>
+      <div style="font-size: 3rem"></div>
       <h3>Sin cotizaciones</h3>
       <p class="text-muted">Crea tu primera cotización para un cliente.</p>
       <a
         href="{% url 'dashboards:crear_cotizacion' %}"
         class="btn btn--primary"
         style="margin-top: 1rem"
-        >➕ Nueva Cotización</a
+        > Nueva Cotización</a
       >
     </div>
     {% endif %}

@@ -18,6 +18,12 @@ class PerfilUsuario(models.Model):
 
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil', verbose_name='Usuario')
     rol = models.CharField(max_length=20, choices=OPCIONES_ROL, default='paciente', verbose_name='Rol')
+    bodega = models.ForeignKey(
+        'inventario.Bodega', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='operadores',
+        verbose_name='Bodega Asignada',
+        help_text='Solo para operadores logísticos: la bodega que gestionan.'
+    )
     rut = models.CharField(max_length=12, blank=True, verbose_name='RUT')
     telefono = models.CharField(max_length=20, blank=True, verbose_name='Telefono')
     direccion = models.TextField(blank=True, verbose_name='Direccion')

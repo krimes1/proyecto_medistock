@@ -4,7 +4,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
     <div class="container">
-        <h1 class="page-header__title">🤝 Alianzas Estratégicas</h1>
+        <h1 class="page-header__title"> Alianzas Estratégicas</h1>
         <p class="page-header__subtitle">Gestión de convenios con clínicas e instituciones de salud</p>
     </div>
 </section>
@@ -14,13 +14,13 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                 <a href="{% url 'dashboards:lista_alianzas' %}" class="btn btn--sm {% if not estado_filtro %}btn--primary{% else %}btn--outline{% endif %}">Todas</a>
-                <a href="?estado=activa" class="btn btn--sm {% if estado_filtro == 'activa' %}btn--primary{% else %}btn--outline{% endif %}">✅ Activas</a>
-                <a href="?estado=en_negociacion" class="btn btn--sm {% if estado_filtro == 'en_negociacion' %}btn--primary{% else %}btn--outline{% endif %}">🔄 En Negociación</a>
-                <a href="?estado=prospecto" class="btn btn--sm {% if estado_filtro == 'prospecto' %}btn--primary{% else %}btn--outline{% endif %}">🔍 Prospectos</a>
-                <a href="?estado=pausada" class="btn btn--sm {% if estado_filtro == 'pausada' %}btn--primary{% else %}btn--outline{% endif %}">⏸ Pausadas</a>
+                <a href="?estado=activa" class="btn btn--sm {% if estado_filtro == 'activa' %}btn--primary{% else %}btn--outline{% endif %}"> Activas</a>
+                <a href="?estado=en_negociacion" class="btn btn--sm {% if estado_filtro == 'en_negociacion' %}btn--primary{% else %}btn--outline{% endif %}"> En Negociación</a>
+                <a href="?estado=prospecto" class="btn btn--sm {% if estado_filtro == 'prospecto' %}btn--primary{% else %}btn--outline{% endif %}"> Prospectos</a>
+                <a href="?estado=pausada" class="btn btn--sm {% if estado_filtro == 'pausada' %}btn--primary{% else %}btn--outline{% endif %}"> Pausadas</a>
             </div>
             <div style="display:flex;gap:0.5rem;">
-                <a href="{% url 'dashboards:crear_alianza' %}" class="btn btn--sm btn--secondary">➕ Nueva Alianza</a>
+                <a href="{% url 'dashboards:crear_alianza' %}" class="btn btn--sm btn--secondary"> Nueva Alianza</a>
                 <a href="{% url 'dashboards:administrador' %}" class="btn btn--sm btn--outline">← Dashboard</a>
             </div>
         </div>
@@ -52,18 +52,18 @@
                     {% endif %}
                 </div>
                 <div class="alianza-card__actions">
-                    <a href="{% url 'dashboards:editar_alianza' a.pk %}" class="btn btn--sm btn--primary">✏️ Editar</a>
-                    <a href="{% url 'dashboards:eliminar_alianza' a.pk %}" class="btn btn--sm btn--outline" style="border-color:var(--danger);color:var(--danger);">🗑 Eliminar</a>
+                    <a href="{% url 'dashboards:editar_alianza' a.pk %}" class="btn btn--sm btn--primary"> Editar</a>
+                    <a href="{% url 'dashboards:eliminar_alianza' a.pk %}" class="btn btn--sm btn--outline" style="border-color:var(--danger);color:var(--danger);"> Eliminar</a>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
         <div class="card" style="text-align:center;padding:3rem;">
-            <div style="font-size:3rem;">🤝</div>
+            <div style="font-size:3rem;"></div>
             <h3>Sin alianzas registradas</h3>
             <p class="text-muted">Comienza registrando tu primera alianza con una clínica.</p>
-            <a href="{% url 'dashboards:crear_alianza' %}" class="btn btn--primary" style="margin-top:1rem;">➕ Crear Primera Alianza</a>
+            <a href="{% url 'dashboards:crear_alianza' %}" class="btn btn--primary" style="margin-top:1rem;"> Crear Primera Alianza</a>
         </div>
         {% endif %}
     </div>

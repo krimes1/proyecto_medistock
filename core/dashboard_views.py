@@ -1,17 +1,19 @@
 """Vistas de dashboards segmentados por rol.
 
-- Ejecutivo de Cuentas: stock multi-bodega, aprobar compras
+- Ejecutivo de Cuentas: stock multi-bodega, aprobar compras, gestión de stock
 - Operador Logístico: órdenes por urgencia, despachar
 - Analista de Finanzas: confirmar pagos, auditar
 - Administrador: reportes de venta, alianzas
 """
+import json
 from datetime import timedelta
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.mail import EmailMessage
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
+from django.views.decorators.http import require_POST
 from cuentas.decorators import rol_requerido
 from pedidos.models import Pedido
 from pedidos.emails import enviar_boleta_compra
@@ -63,12 +65,158 @@ def stock_bodega(request, bodega_id):
 @rol_requerido('ejecutivo', 'administrador')
 def aprobar_pedido(request, pedido_id):
     """Aprueba un pedido pendiente (cambia estado a aprobado)."""
-    pedido = get_object_or_404(Pedido, pk=pedido_id, estado='pendiente')
-    pedido.estado = 'aprobado'
-    pedido.aprobado_en = timezone.now()
-    pedido.save()
-    messages.success(request, f'Pedido {pedido.numero_pedido} aprobado.')
+    pedido = get_object_or_404(Pedido, pk=pedido_id)
+    if pedido.estado == 'aprobado':
+        messages.info(request, f'El pedido {pedido.numero_pedido} ya se encuentra aprobado.')
+    elif pedido.estado == 'pendiente':
+        pedido.estado = 'aprobado'
+        pedido.aprobado_en = timezone.now()
+        pedido.save()
+        messages.success(request, f'Pedido {pedido.numero_pedido} aprobado exitosamente.')
+    else:
+        messages.warning(request, f'El pedido {pedido.numero_pedido} está en estado "{pedido.get_estado_display()}" y no puede ser aprobado.')
+    
     return redirect('dashboards:ejecutivo')
+
+
+@rol_requerido('ejecutivo', 'administrador')
+def pedidos_aprobados(request):
+    """Vista de lista de pedidos ya aprobados por el ejecutivo."""
+    # Obtenemos los pedidos que ya fueron aprobados, es decir, que no están pendientes
+    pedidos = Pedido.objects.exclude(estado='pendiente').exclude(estado='cancelado').select_related('usuario').order_by('-aprobado_en', '-creado_en')
+    
+    contexto = {
+        'pedidos': pedidos,
+        'total_pedidos': pedidos.count(),
+    }
+    return render(request, 'dashboards/ejecutivo_pedidos_aprobados.html', contexto)
+
+
+@rol_requerido('ejecutivo', 'administrador')
+def revisar_stock(request):
+    """Vista de revisión de stock: lista de todos los productos con stock editable."""
+    busqueda = request.GET.get('q', '').strip()
+    categoria = request.GET.get('categoria', '')
+    estado_stock = request.GET.get('estado', '')
+
+    productos = Producto.objects.filter(activo=True).select_related('categoria', 'marca')
+
+    if busqueda:
+        productos = productos.filter(
+            Q(nombre__icontains=busqueda) |
+            Q(sku__icontains=busqueda) |
+            Q(marca__nombre__icontains=busqueda)
+        )
+
+    if categoria:
+        productos = productos.filter(categoria__slug=categoria)
+
+    productos = productos.order_by('nombre')
+
+    # Enriquecer con datos de stock
+    productos_stock = []
+    for prod in productos:
+        items = ItemStock.objects.filter(producto=prod).select_related('bodega')
+        stock_total = sum(i.cantidad for i in items)
+        stock_minimo = min((i.stock_minimo for i in items), default=10)
+
+        if estado_stock == 'critico' and stock_total > stock_minimo:
+            continue
+        if estado_stock == 'ok' and stock_total <= stock_minimo:
+            continue
+        if estado_stock == 'agotado' and stock_total > 0:
+            continue
+
+        productos_stock.append({
+            'producto': prod,
+            'items': items,
+            'stock_total': stock_total,
+            'stock_minimo': stock_minimo,
+            'estado': 'agotado' if stock_total == 0 else ('critico' if stock_total <= stock_minimo else 'ok'),
+        })
+
+    from productos.models import Categoria
+    categorias = Categoria.objects.filter(activa=True).order_by('nombre')
+
+    contexto = {
+        'productos_stock': productos_stock,
+        'total_productos': len(productos_stock),
+        'busqueda': busqueda,
+        'categoria_filtro': categoria,
+        'estado_filtro': estado_stock,
+        'categorias': categorias,
+    }
+    return render(request, 'dashboards/revisar_stock.html', contexto)
+
+
+@rol_requerido('ejecutivo', 'administrador')
+@require_POST
+def actualizar_stock(request, item_id):
+    """Actualiza la cantidad de stock de un ItemStock via AJAX."""
+    item = get_object_or_404(ItemStock, pk=item_id)
+    try:
+        data = json.loads(request.body)
+        nueva_cantidad = int(data.get('cantidad', 0))
+        if nueva_cantidad < 0:
+            return JsonResponse({'error': 'La cantidad no puede ser negativa.'}, status=400)
+        item.cantidad = nueva_cantidad
+        item.save()
+        # Recalcular stock total del producto
+        stock_total = ItemStock.objects.filter(producto=item.producto).aggregate(
+            total=Sum('cantidad')
+        )['total'] or 0
+        return JsonResponse({
+            'ok': True,
+            'nueva_cantidad': item.cantidad,
+            'stock_total': stock_total,
+            'estado': 'agotado' if stock_total == 0 else ('critico' if stock_total <= item.stock_minimo else 'ok'),
+        })
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Cantidad inválida.'}, status=400)
+
+
+@rol_requerido('ejecutivo', 'administrador')
+def descargar_reporte_stock(request):
+    """Genera y descarga un reporte PDF de stock (de un producto o de todos)."""
+    producto_id = request.GET.get('producto_id', '')
+    from core.reportes import generar_reporte_stock_ejecutivo
+    buf = generar_reporte_stock_ejecutivo(producto_id=producto_id if producto_id else None)
+    fecha_str = timezone.now().strftime('%Y%m%d')
+    filename = f'medistock_stock_{fecha_str}.pdf'
+    response = HttpResponse(buf.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+@rol_requerido('ejecutivo', 'administrador')
+def enviar_reporte_stock(request):
+    """Genera un reporte PDF de stock y lo envía al correo indicado."""
+    email_destino = request.GET.get('email', '').strip()
+    producto_id = request.GET.get('producto_id', '')
+
+    if not email_destino:
+        messages.error(request, 'Debes indicar un correo de destino.')
+        return redirect('dashboards:revisar_stock')
+
+    from core.reportes import generar_reporte_stock_ejecutivo
+    buf = generar_reporte_stock_ejecutivo(producto_id=producto_id if producto_id else None)
+    fecha_str = timezone.now().strftime('%Y%m%d')
+    filename = f'medistock_stock_{fecha_str}.pdf'
+
+    email = EmailMessage(
+        subject='[MediStock] Reporte de Stock',
+        body=f'Estimado/a,\n\n'
+             f'Adjunto encontrará el reporte de stock generado el {timezone.now().strftime("%d/%m/%Y %H:%M")}.\n\n'
+             f'Generado por: {request.user.get_full_name() or request.user.username}\n\n'
+             f'Atentamente,\nSistema MediStock',
+        from_email='MediStock <medistock.soporte@gmail.com>',
+        to=[email_destino],
+    )
+    email.attach(filename, buf.read(), 'application/pdf')
+    email.send(fail_silently=False)
+
+    messages.success(request, f'El reporte de stock fue enviado a {email_destino}.')
+    return redirect('dashboards:revisar_stock')
 
 
 # ============================================================
@@ -76,23 +224,38 @@ def aprobar_pedido(request, pedido_id):
 # ============================================================
 @rol_requerido('logistica', 'administrador')
 def dashboard_logistica(request):
-    """Dashboard Logístico: pedidos priorizados por urgencia médica."""
+    """Dashboard Logístico: pedidos priorizados por urgencia médica, filtrados por bodega asignada."""
     # Prioridad: critico > urgente > normal
-    orden_prioridad = ['critico', 'urgente', 'normal']
     pedidos = Pedido.objects.filter(
-        estado__in=['aprobado', 'preparando']
+        estado__in=['pendiente', 'aprobado', 'preparando']
     ).select_related('usuario', 'bodega').order_by('-prioridad', 'creado_en')
 
-    # Separar por prioridad
-    criticos = pedidos.filter(prioridad='critico')
-    urgentes = pedidos.filter(prioridad='urgente')
-    normales = pedidos.filter(prioridad='normal')
+    # Filtrar por bodega asignada al operador (admin ve todo)
+    bodega_asignada = None
+    if request.user.perfil.rol == 'logistica' and request.user.perfil.bodega:
+        bodega_asignada = request.user.perfil.bodega
+        pedidos = pedidos.filter(bodega=bodega_asignada)
+
+    # Separar por estado
+    pedidos_previos = pedidos.filter(estado='pendiente')
+    pedidos_nuevos = pedidos.filter(estado='aprobado')
+    pedidos_curso = pedidos.filter(estado='preparando')
 
     contexto = {
-        'criticos': criticos,
-        'urgentes': urgentes,
-        'normales': normales,
+        'previos_criticos': pedidos_previos.filter(prioridad='critico'),
+        'previos_urgentes': pedidos_previos.filter(prioridad='urgente'),
+        'previos_normales': pedidos_previos.filter(prioridad='normal'),
+        'nuevos_criticos': pedidos_nuevos.filter(prioridad='critico'),
+        'nuevos_urgentes': pedidos_nuevos.filter(prioridad='urgente'),
+        'nuevos_normales': pedidos_nuevos.filter(prioridad='normal'),
+        'curso_criticos': pedidos_curso.filter(prioridad='critico'),
+        'curso_urgentes': pedidos_curso.filter(prioridad='urgente'),
+        'curso_normales': pedidos_curso.filter(prioridad='normal'),
+        'total_previos': pedidos_previos.count(),
+        'total_nuevos': pedidos_nuevos.count(),
+        'total_curso': pedidos_curso.count(),
         'total_pedidos': pedidos.count(),
+        'bodega_asignada': bodega_asignada,
     }
     return render(request, 'dashboards/logistica.html', contexto)
 
@@ -119,7 +282,7 @@ def despachar_pedido(request, pedido_id):
         pedido=pedido,
         transportista=datos_envio['transportista'],
         numero_seguimiento=datos_envio['numero_seguimiento'],
-        estado='etiqueta_creada',
+        estado='en_transito',
         entrega_estimada=datos_envio['entrega_estimada'],
         peso_kg=datos_envio['peso_estimado'],
         despachado_en=timezone.now(),
@@ -162,6 +325,21 @@ def dashboard_analista(request):
         'total_transacciones': total_transacciones,
     }
     return render(request, 'dashboards/analista.html', contexto)
+
+
+@rol_requerido('analista', 'administrador')
+def revisar_transferencia(request, pago_id):
+    """Vista para que el analista revise el comprobante y los detalles del pedido."""
+    pago = get_object_or_404(Pago, pk=pago_id, metodo='transferencia', estado='pendiente')
+    pedido = pago.pedido
+    items = pedido.items.select_related('producto').all()
+
+    contexto = {
+        'pago': pago,
+        'pedido': pedido,
+        'items': items,
+    }
+    return render(request, 'dashboards/revisar_transferencia.html', contexto)
 
 
 @rol_requerido('analista', 'administrador')
@@ -321,7 +499,7 @@ def enviar_reporte(request, tipo):
     email.attach(filename, buf.read(), 'application/pdf')
     email.send(fail_silently=False)
 
-    messages.success(request, f'✅ El reporte "{titulo}" fue enviado a {request.user.email}.')
+    messages.success(request, f' El reporte "{titulo}" fue enviado a {request.user.email}.')
     return redirect('dashboards:administrador')
 
 

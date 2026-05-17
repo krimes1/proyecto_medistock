@@ -5,7 +5,7 @@
 {% block contenido %}
 <section class="page-header page-header--dark">
     <div class="container">
-        <h1 class="page-header__title">📊 Dashboard — Ejecutivo de Cuentas</h1>
+        <h1 class="page-header__title"> Dashboard — Ejecutivo de Cuentas</h1>
         <p class="page-header__subtitle">Stock multi-bodega y gestión de pedidos</p>
     </div>
 </section>
@@ -13,7 +13,7 @@
 <section class="section section--white">
     <div class="container">
         <!-- Bodegas -->
-        <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin-bottom:1.5rem;">🏪 Stock por Bodega</h2>
+        <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin-bottom:1.5rem;"> Stock por Bodega</h2>
         <div class="dashboard-cards">
             {% for bodega in bodegas %}
             <div class="dashboard-card">
@@ -37,10 +37,13 @@
         </div>
 
         <!-- Pedidos Pendientes -->
-        <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin:3rem 0 1.5rem;">
-            📋 Pedidos Pendientes de Aprobación
-            <span class="badge badge--warning" style="font-size:0.8rem;">{{ total_pendientes }}</span>
-        </h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:3rem 0 1.5rem;">
+            <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin:0;">
+                 Pedidos Pendientes de Aprobación
+                <span class="badge badge--warning" style="font-size:0.8rem;">{{ total_pendientes }}</span>
+            </h2>
+            <a href="{% url 'dashboards:pedidos_aprobados' %}" class="btn btn--sm btn--outline">Ver Pedidos Aprobados →</a>
+        </div>
         {% if pedidos_pendientes %}
         <div class="tabla-responsive">
             <table class="tabla">
@@ -60,7 +63,7 @@
                         <td>${{ pedido.total|floatformat:0 }}</td>
                         <td>{{ pedido.creado_en|date:"d/m H:i" }}</td>
                         <td>
-                            <a href="{% url 'dashboards:aprobar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary">✓ Aprobar</a>
+                            <a href="{% url 'dashboards:aprobar_pedido' pedido_id=pedido.pk %}" class="btn btn--sm btn--secondary"> Aprobar</a>
                         </td>
                     </tr>
                     {% endfor %}

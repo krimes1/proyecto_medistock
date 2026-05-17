@@ -274,7 +274,7 @@ def generar_reporte_inventario():
         t.setStyle(_tabla_estilo())
         elems.append(t)
     else:
-        elems.append(Paragraph('✅ Todos los productos están sobre el stock mínimo.',
+        elems.append(Paragraph(' Todos los productos están sobre el stock mínimo.',
                                styles['Normal']))
 
     doc.build(elems, onFirstPage=_pie_pagina, onLaterPages=_pie_pagina)
@@ -528,6 +528,116 @@ def generar_pdf_cotizacion(cotizacion):
         f'Cotización generada por: <b>{vendedor_nombre}</b> — MediStock Ejecutivo de Cuentas',
         styles['Pie']
     ))
+
+    doc.build(elems, onFirstPage=_pie_pagina, onLaterPages=_pie_pagina)
+    buf.seek(0)
+    return buf
+
+
+# Alias for F() needed in the stock report
+from django.db.models import F as models_F
+
+
+# ════════════════════════════════════════
+# 8) REPORTE DE STOCK — EJECUTIVO
+# ════════════════════════════════════════
+def generar_reporte_stock_ejecutivo(producto_id=None):
+    """Genera un PDF con el estado del stock, opcionalmente filtrado por producto."""
+    from inventario.models import ItemStock
+    from productos.models import Producto
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=letter,
+                            topMargin=0.8*inch, bottomMargin=0.8*inch)
+    styles = _styles()
+    elems = []
+
+    if producto_id:
+        producto = Producto.objects.filter(pk=producto_id).first()
+        titulo = f'Reporte de Stock — {producto.nombre}' if producto else 'Reporte de Stock'
+    else:
+        producto = None
+        titulo = 'Reporte General de Stock'
+
+    _header(elems, styles, titulo,
+            f'Fecha: {date.today().strftime("%d/%m/%Y")}')
+
+    # Filtrar items de stock
+    items_qs = ItemStock.objects.select_related('producto', 'bodega').order_by(
+        'bodega__nombre', 'producto__nombre'
+    )
+    if producto:
+        items_qs = items_qs.filter(producto=producto)
+
+    # KPIs
+    total_items = items_qs.count()
+    total_unidades = items_qs.aggregate(t=Sum('cantidad'))['t'] or 0
+    bajo_stock = items_qs.filter(cantidad__lte=models_F('stock_minimo'), cantidad__gt=0).count()
+    agotados = items_qs.filter(cantidad=0).count()
+
+    elems.append(Paragraph('Resumen General', styles['SeccionTitulo']))
+    kpi_data = [
+        ['Registros', 'Unidades Totales', 'Bajo Stock', 'Agotados'],
+        [str(total_items), f'{total_unidades:,}'.replace(',', '.'),
+         str(bajo_stock), str(agotados)],
+    ]
+    kpi = Table(kpi_data, colWidths=[1.5*inch]*4)
+    kpi.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), AZUL),
+        ('TEXTCOLOR', (0, 0), (-1, 0), BLANCO),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 1), (-1, 1), 13),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#DEE2E6')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    elems.append(kpi)
+    elems.append(Spacer(1, 16))
+
+    # Tabla detallada
+    elems.append(Paragraph('Detalle de Stock por Producto y Bodega', styles['SeccionTitulo']))
+    data = [['Producto', 'SKU', 'Bodega', 'Lote', 'Cantidad', 'Min.', 'Vencimiento', 'Estado']]
+    for it in items_qs:
+        if it.esta_vencido:
+            estado = 'VENCIDO'
+        elif it.cantidad == 0:
+            estado = 'AGOTADO'
+        elif it.stock_bajo:
+            estado = 'BAJO'
+        else:
+            estado = 'OK'
+        data.append([
+            it.producto.nombre[:25],
+            it.producto.sku,
+            it.bodega.codigo,
+            it.numero_lote,
+            str(it.cantidad),
+            str(it.stock_minimo),
+            it.fecha_vencimiento.strftime('%d/%m/%Y'),
+            estado,
+        ])
+
+    if len(data) > 1:
+        t = Table(data, colWidths=[
+            1.5*inch, 0.7*inch, 0.6*inch, 0.7*inch, 0.6*inch, 0.5*inch, 0.8*inch, 0.6*inch
+        ])
+        style = _tabla_estilo()
+        for i, row in enumerate(data[1:], 1):
+            if row[-1] == 'VENCIDO':
+                style.add('TEXTCOLOR', (-1, i), (-1, i), colors.HexColor('#E74C3C'))
+                style.add('FONTNAME', (-1, i), (-1, i), 'Helvetica-Bold')
+            elif row[-1] == 'AGOTADO':
+                style.add('TEXTCOLOR', (-1, i), (-1, i), colors.HexColor('#E74C3C'))
+            elif row[-1] == 'BAJO':
+                style.add('TEXTCOLOR', (-1, i), (-1, i), colors.HexColor('#F39C12'))
+                style.add('FONTNAME', (-1, i), (-1, i), 'Helvetica-Bold')
+            else:
+                style.add('TEXTCOLOR', (-1, i), (-1, i), colors.HexColor('#2ECC71'))
+        t.setStyle(style)
+        elems.append(t)
+    else:
+        elems.append(Paragraph('No se encontraron registros de stock.', styles['Normal']))
 
     doc.build(elems, onFirstPage=_pie_pagina, onLaterPages=_pie_pagina)
     buf.seek(0)

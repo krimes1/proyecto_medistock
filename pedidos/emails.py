@@ -33,6 +33,13 @@ def enviar_boleta_compra(pedido, pago, boleta):
     
     <p>Tu pedido será preparado para despacho según el método seleccionado.</p>
     <p>Te notificaremos cuando haya cambios en el estado de tu pedido.</p>
+    
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #0056b3; text-align: center;">
+        <h3 style="margin-top: 0; color: #0056b3;">Rastrea tu pedido</h3>
+        <p>Usa el siguiente código en nuestra página de seguimiento:</p>
+        <p style="font-size: 1.2rem; font-weight: bold; background: white; padding: 10px; border-radius: 3px; display: inline-block;">{pedido.numero_pedido}</p>
+    </div>
+    
     <br>
     <p>Saludos,</p>
     <p>El equipo de MediStock</p>
@@ -75,3 +82,25 @@ def enviar_notificacion_estado(pedido, estado_anterior):
     
     if to_email:
         send_mail(subject, plain_message, from_email, [to_email], html_message=html_message, fail_silently=True)
+
+def enviar_alerta_transferencia_analista(pago):
+    """Envía alerta a los analistas de finanzas cuando se sube un comprobante."""
+    from django.contrib.auth.models import User
+    analistas = User.objects.filter(perfil__rol='analista', is_active=True).values_list('email', flat=True)
+    correos = [email for email in analistas if email]
+    if not correos:
+        return
+    
+    subject = f"[MediStock] Transferencia Pendiente - Pedido {pago.pedido.numero_pedido}"
+    html_message = f"""
+    <h2>Transferencia Pendiente de Aprobación</h2>
+    <p>Un cliente ha subido un comprobante de transferencia que requiere revisión.</p>
+    <ul>
+        <li><strong>Pedido:</strong> {pago.pedido.numero_pedido}</li>
+        <li><strong>Cliente:</strong> {pago.pedido.usuario.get_full_name() or pago.pedido.usuario.username}</li>
+        <li><strong>Monto a verificar:</strong> ${pago.monto}</li>
+        <li><strong>Fecha:</strong> {pago.creado_en.strftime('%d/%m/%Y %H:%M')}</li>
+    </ul>
+    <p>Ingresa al panel de Finanzas para validar el comprobante y aprobar el pedido.</p>
+    """
+    send_mail(subject, strip_tags(html_message), settings.DEFAULT_FROM_EMAIL, correos, html_message=html_message, fail_silently=True)

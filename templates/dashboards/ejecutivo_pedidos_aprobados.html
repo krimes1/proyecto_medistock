@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pedidos Aprobados{% endblock %}
+
+{% block contenido %}
+<section class="page-header page-header--dark">
+    <div class="container">
+        <h1 class="page-header__title"> Historial de Pedidos Aprobados</h1>
+        <p class="page-header__subtitle">Seguimiento de órdenes procesadas por el equipo ejecutivo</p>
+    </div>
+</section>
+
+<section class="section section--white">
+    <div class="container">
+        <div style="margin-bottom: 2rem;">
+            <a href="{% url 'dashboards:ejecutivo' %}" class="btn btn--sm btn--outline">← Volver al Panel Principal</a>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+            <h2 class="section__title" style="font-size:1.5rem;text-align:left;margin:0;">
+                 Órdenes Procesadas
+                <span class="badge badge--success" style="font-size:0.8rem;">{{ total_pedidos }}</span>
+            </h2>
+        </div>
+
+        {% if pedidos %}
+        <div class="tabla-responsive">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>Nº Pedido</th>
+                        <th>Cliente</th>
+                        <th>Prioridad</th>
+                        <th>Estado Actual</th>
+                        <th>Monto Total</th>
+                        <th>Fecha Aprobación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    <tr>
+                        <td><strong>{{ pedido.numero_pedido }}</strong></td>
+                        <td>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</td>
+                        <td>
+                            <span class="badge {% if pedido.prioridad == 'critico' %}badge--danger{% elif pedido.prioridad == 'urgente' %}badge--warning{% else %}badge--success{% endif %}">
+                                {{ pedido.get_prioridad_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if pedido.estado == 'pendiente' %}badge--secondary
+                                {% elif pedido.estado == 'aprobado' %}badge--warning
+                                {% elif pedido.estado == 'preparando' %}badge--warning
+                                {% elif pedido.estado == 'despachado' %}badge--success
+                                {% elif pedido.estado == 'entregado' %}badge--success
+                                {% elif pedido.estado == 'cancelado' %}badge--danger
+                                {% else %}badge--secondary{% endif %}">
+                                {{ pedido.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>${{ pedido.total|floatformat:0 }}</td>
+                        <td>
+                            {% if pedido.aprobado_en %}
+                                {{ pedido.aprobado_en|date:"d/m/Y H:i" }}
+                            {% else %}
+                                <span class="text-muted">No registrada</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <h3>No hay pedidos aprobados</h3>
+            <p>Aún no has aprobado ningún pedido en el sistema.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block titulo %}Revisar Transferencia{% endblock %}
+
+{% block contenido %}
+<section class="page-header page-header--dark">
+  <div class="container">
+    <h1 class="page-header__title">Revisar Transferencia</h1>
+    <p class="page-header__subtitle">
+      Pedido {{ pedido.numero_pedido }} — Cliente: {{ pedido.usuario.get_full_name|default:pedido.usuario.username }}
+    </p>
+  </div>
+</section>
+
+<section class="section section--white">
+  <div class="container" style="max-width: 1000px;">
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+      <!-- Detalles del Pedido -->
+      <div>
+        <div class="card" style="height: 100%;">
+          <h3 class="card__title">Detalles del Pedido</h3>
+          
+          <div class="carrito-resumen__linea"><span>Nº Pedido</span><span><strong>{{ pedido.numero_pedido }}</strong></span></div>
+          <div class="carrito-resumen__linea"><span>Cliente</span><span>{{ pedido.usuario.get_full_name|default:pedido.usuario.username }}</span></div>
+          <div class="carrito-resumen__linea"><span>RUT/DNI</span><span>{{ pedido.usuario.perfil.rut|default:"No registrado" }}</span></div>
+          <div class="carrito-resumen__linea"><span>Fecha Pedido</span><span>{{ pedido.creado_en|date:"d/m/Y H:i" }}</span></div>
+          
+          <hr>
+          
+          <h4 style="margin-bottom: 0.5rem;">Ítems del Pedido:</h4>
+          {% for item in items %}
+          <div class="checkout-item" style="font-size: 0.9rem;">
+              <span>{{ item.cantidad }}x {{ item.producto.nombre }}</span>
+              <span>${{ item.subtotal|floatformat:0 }}</span>
+          </div>
+          {% endfor %}
+          
+          <hr>
+          
+          <div class="carrito-resumen__linea"><span>Subtotal</span><span>${{ pedido.subtotal|floatformat:0 }}</span></div>
+          <div class="carrito-resumen__linea"><span>Envío</span><span>${{ pedido.costo_envio|floatformat:0 }}</span></div>
+          <div class="carrito-resumen__linea"><span>IVA (19%)</span><span>${{ pedido.impuesto|floatformat:0 }}</span></div>
+          <div class="carrito-resumen__total"><span>Total a Validar</span><span style="color: var(--primary-color);">${{ pedido.total|floatformat:0 }} CLP</span></div>
+        </div>
+      </div>
+
+      <!-- Comprobante -->
+      <div>
+        <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+          <h3 class="card__title">Comprobante de Transferencia</h3>
+          <p class="text-muted" style="margin-bottom: 1rem;">Monto reportado por sistema: <strong>${{ pago.monto|floatformat:0 }} CLP</strong></p>
+          
+          <div style="flex-grow: 1; border: 1px dashed var(--border-color); border-radius: 4px; padding: 1rem; display: flex; justify-content: center; align-items: center; background: #fafafa; overflow: hidden; min-height: 300px;">
+            {% if pago.comprobante %}
+              {% if pago.comprobante.url|slice:"-4:" == ".pdf" %}
+                <embed src="{{ pago.comprobante.url }}" width="100%" height="400px" type="application/pdf">
+              {% else %}
+                <img src="{{ pago.comprobante.url }}" alt="Comprobante Transferencia" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 4px;">
+              {% endif %}
+            {% else %}
+              <div style="text-align: center; color: var(--text-muted);">
+                <p>No se adjuntó comprobante.</p>
+              </div>
+            {% endif %}
+          </div>
+          
+          {% if pago.comprobante %}
+          <div style="margin-top: 1rem; text-align: center;">
+             <a href="{{ pago.comprobante.url }}" target="_blank" class="btn btn--outline btn--sm">Ver Comprobante a Pantalla Completa</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="card" style="margin-top: 2rem;">
+      <h3 class="card__title">Acciones de Auditoría</h3>
+      <p class="text-muted">Verifica que el monto transferido en el comprobante coincida exactamente con el Total a Validar (${{ pedido.total|floatformat:0 }} CLP) y que el dinero haya ingresado a la cuenta bancaria de la empresa.</p>
+      
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+        <a href="{% url 'dashboards:analista' %}" class="btn btn--outline">← Volver al Panel</a>
+        <!-- Add reject payment button logic later if needed -->
+        <a href="{% url 'dashboards:confirmar_transferencia' pago_id=pago.pk %}" class="btn btn--primary" onclick="return confirm('¿Estás seguro de que el dinero ha sido recibido y cuadra perfectamente con la boleta? Esta acción generará la boleta tributaria.')">Aprobar Transferencia y Generar Boleta</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
