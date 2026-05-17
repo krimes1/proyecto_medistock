@@ -641,7 +641,7 @@ ul { list-style: none; }
 
 .footer__grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr 1.5fr;
   gap: 3rem;
   margin-bottom: 3rem;
 }
